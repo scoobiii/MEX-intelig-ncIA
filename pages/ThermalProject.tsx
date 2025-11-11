@@ -1,7 +1,8 @@
+
 import React, { useEffect } from 'react';
-import DashboardCard from '../components/DashboardCard';
+import DashboardCard from '../DashboardCard';
 // Import necessary icons for DashboardCard.
-import { ActivityIcon, SnowflakeIcon, ThermometerIcon, CloudIcon, ChartBarIcon, InfoIcon } from '../components/icons';
+import { ActivityIcon, SnowflakeIcon, ThermometerIcon, CloudIcon, ChartBarIcon, InfoIcon } from '../application/components/icons';
 
 
 // Using window.mermaid as it's loaded from a script tag in index.html

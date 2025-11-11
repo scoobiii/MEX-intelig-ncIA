@@ -11,6 +11,7 @@ import {
   ChartBarIcon,
   WarningIcon,
   InfoIcon,
+  WalletIcon,
 } from '../application/components/icons';
 
 // ==================== MOCK DATA ====================
@@ -398,12 +399,25 @@ const GridStabilityMonitor = () => {
 // ==================== MAIN DASHBOARD ====================
 
 export default function MainDashboard() {
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
 
   useEffect(() => {
     // Simular carregamento
     setTimeout(() => setLoading(false), 1000)
-  }, [])
+  }, []);
+
+  const handleConnectWallet = async () => {
+    // Simula uma conexão de carteira assíncrona
+    setTimeout(() => {
+      const exampleAddress = "0x" + Array(40).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+      setWalletAddress(exampleAddress);
+    }, 500);
+  };
+
+  const handleDisconnectWallet = () => {
+    setWalletAddress(null);
+  };
 
   if (loading) {
     return (
@@ -426,9 +440,31 @@ export default function MainDashboard() {
               <h1 className="text-2xl font-bold text-gray-900">Dashboard MEX Trade</h1>
               <p className="text-sm text-gray-600">Plataforma de Inteligência e Operações no Mercado de Energia.</p>
             </div>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-              Atualizar dados
-            </button>
+            <div className="flex items-center">
+              {walletAddress ? (
+                <div className="flex items-center gap-4">
+                  <div className="text-sm">
+                    <span className="font-mono bg-gray-100 text-gray-700 p-2 rounded-md">
+                      {`${walletAddress.substring(0, 6)}...${walletAddress.substring(walletAddress.length - 4)}`}
+                    </span>
+                  </div>
+                  <button 
+                    onClick={handleDisconnectWallet}
+                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm font-medium"
+                  >
+                    Desconectar
+                  </button>
+                </div>
+              ) : (
+                <button 
+                  onClick={handleConnectWallet}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center gap-2"
+                >
+                  <WalletIcon className="w-5 h-5" />
+                  Conectar Carteira
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </header>

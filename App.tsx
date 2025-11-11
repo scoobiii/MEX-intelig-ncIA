@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import Header from './application/Header';
 import Navigation, { Page } from './application/components/Navigation';
@@ -297,12 +298,7 @@ const App: React.FC = () => {
 
   // Special case for full-screen pages
   if (currentPage === 'Infrastructure') {
-    return (
-      <>
-        <Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
-        <Infrastructure />
-      </>
-    );
+    return <Infrastructure />;
   }
 
   const renderPage = () => {

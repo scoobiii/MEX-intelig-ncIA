@@ -20,7 +20,7 @@ const SubSection: React.FC<{ title: string; children: React.ReactNode }> = ({ ti
 
 const BulletPoint: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <li className="flex items-start">
-        <span className="text-cyan-400 mr-3 mt-1">&#10148;</span>
+        <span className="text-cyan-400 mr-3 mt-1">➤</span>
         <span>{children}</span>
     </li>
 );
@@ -39,14 +39,14 @@ const PhaseCard: React.FC<{ phase: string; title: string; duration: string; obje
     </div>
 );
 
-const DeliverableList: React.FC<{ items: { title: string; description: string; }[] }> = ({ items }) => (
+const DeliverableList: React.FC<{ items: string[] }> = ({ items }) => (
     <div>
         <h4 className="font-semibold text-cyan-400 mb-2">Entregas Chave:</h4>
         <ul className="space-y-2 text-sm text-gray-300">
             {items.map((item, index) => (
                 <li key={index} className="flex">
-                    <span className="text-cyan-400 mr-2">&#10148;</span>
-                    <span><strong>{item.title}:</strong> {item.description}</span>
+                    <span className="text-cyan-400 mr-2">➤</span>
+                    <span>{item}</span>
                 </li>
             ))}
         </ul>
@@ -79,20 +79,20 @@ const OpenEnergy: React.FC = () => {
                     <SubSection title="O Problema">
                         <p>O mercado livre de energia no Brasil enfrenta:</p>
                         <ul className="space-y-2 mt-4">
-                            <BulletPoint><strong>Complexidade de informações</strong> dispersas entre múltiplos agentes</BulletPoint>
-                            <BulletPoint><strong>Dificuldade de comparação</strong> entre ofertas e condições comerciais</BulletPoint>
-                            <BulletPoint><strong>Falta de transparência</strong> nos preços e disponibilidade</BulletPoint>
-                            <BulletPoint><strong>Barreiras técnicas</strong> para consumidores elegíveis migrarem</BulletPoint>
+                            <BulletPoint>Complexidade de informações dispersas entre múltiplos agentes</BulletPoint>
+                            <BulletPoint>Dificuldade de comparação entre ofertas e condições comerciais</BulletPoint>
+                            <BulletPoint>Falta de transparência nos preços e disponibilidade</BulletPoint>
+                            <BulletPoint>Barreiras técnicas para consumidores elegíveis migrarem</BulletPoint>
                         </ul>
                     </SubSection>
                     <SubSection title="Nossa Solução: Plataforma Open Energy AI">
                         <p><strong>Componentes Principais:</strong></p>
-                        <ol className="list-decimal list-inside space-y-2 mt-4">
-                            <li><strong>Marketplace Inteligente de Energia:</strong> Agregação de ofertas, comparação automática e recomendação personalizada via IA.</li>
-                            <li><strong>Motor de Precificação Preditiva:</strong> Análise histórica de preços PLD, previsão de tendências e alertas de oportunidades.</li>
-                            <li><strong>Assistente Virtual para Migração:</strong> Análise de elegibilidade, simulação de economia e guia passo-a-passo.</li>
-                            <li><strong>Dashboard de Gestão Energética:</strong> Monitoramento de consumo, análise de eficiência e recomendações de otimização.</li>
-                        </ol>
+                        <ul className="list-none space-y-2 mt-4">
+                            <li>Marketplace Inteligente de Energia: Agregação de ofertas, comparação automática e recomendação personalizada via IA.</li>
+                            <li>Motor de Precificação Preditiva: Análise histórica de preços PLD, previsão de tendências e alertas de oportunidades.</li>
+                            <li>Assistente Virtual para Migração: Análise de elegibilidade, simulação de economia e guia passo-a-passo.</li>
+                            <li>Dashboard de Gestão Energética: Monitoramento de consumo, análise de eficiência e recomendações de otimização.</li>
+                        </ul>
                     </SubSection>
                 </Section>
                 
@@ -111,9 +111,9 @@ const OpenEnergy: React.FC = () => {
                                     objective="Definir o escopo, a proposta de valor e o alinhamento regulatório da solução."
                                 >
                                     <DeliverableList items={[
-                                        { title: "Análise de Mercado e Requisitos", description: "Incluindo LGPD e padrões do setor elétrico." },
-                                        { title: "Lean Canvas / Proposta de Valor", description: "Definição clara do modelo de negócio." },
-                                        { title: "Desenho da Arquitetura de Dados", description: "Fontes, fluxos, segurança e consentimento." }
+                                        "Análise de Mercado e Requisitos: Incluindo LGPD e padrões do setor elétrico.",
+                                        "Lean Canvas / Proposta de Valor: Definição clara do modelo de negócio.",
+                                        "Desenho da Arquitetura de Dados: Fontes, fluxos, segurança e consentimento."
                                     ]} />
                                 </PhaseCard>
 
@@ -124,9 +124,9 @@ const OpenEnergy: React.FC = () => {
                                     objective="Construir o protótipo funcional e validar a viabilidade técnica da solução."
                                 >
                                     <DeliverableList items={[
-                                        { title: "Protótipo Funcional (MVP)", description: "Código-fonte da solução mínima viável." },
-                                        { title: "Relatório de Teste de Integração", description: "Demonstração da capacidade de processar dados." },
-                                        { title: "Relatório de Prova de Conceito (PoC)", description: "Métricas de viabilidade técnica." }
+                                        "Protótipo Funcional (MVP): Código-fonte da solução mínima viável.",
+                                        "Relatório de Teste de Integração: Demonstração da capacidade de processar dados.",
+                                        "Relatório de Prova de Conceito (PoC): Métricas de viabilidade técnica."
                                     ]} />
                                 </PhaseCard>
 
@@ -137,9 +137,9 @@ const OpenEnergy: React.FC = () => {
                                     objective="Testar a solução em ambiente operacional, coletando métricas de desempenho."
                                 >
                                     <DeliverableList items={[
-                                        { title: "Plano de Piloto Detalhado", description: "Escopo, métricas de sucesso e cronograma." },
-                                        { title: "Base de Dados de Resultados", description: "Dados brutos e processados do piloto." },
-                                        { title: "Relatório de Análise de Desempenho", description: "Quantificação dos ganhos de eficiência/redução de CO2." }
+                                        "Plano de Piloto Detalhado: Escopo, métricas de sucesso e cronograma.",
+                                        "Base de Dados de Resultados: Dados brutos e processados do piloto.",
+                                        "Relatório de Análise de Desempenho: Quantificação dos ganhos de eficiência/redução de CO2."
                                     ]} />
                                 </PhaseCard>
 
@@ -150,9 +150,9 @@ const OpenEnergy: React.FC = () => {
                                     objective="Consolidar os resultados e definir a estratégia de escala/comercialização."
                                 >
                                     <DeliverableList items={[
-                                        { title: "Relatório Final do Projeto", description: "Resumo executivo, metodologia e aprendizados." },
-                                        { title: "Proposta de Modelo de Negócio", description: "Plano de escala e comercialização." },
-                                        { title: "Apresentação Executiva (Pitch Deck)", description: "Material para Demoday e investidores." }
+                                        "Relatório Final do Projeto: Resumo executivo, metodologia e aprendizados.",
+                                        "Proposta de Modelo de Negócio: Plano de escala e comercialização.",
+                                        "Apresentação Executiva (Pitch Deck): Material para Demoday e investidores."
                                     ]} />
                                 </PhaseCard>
                             </div>
