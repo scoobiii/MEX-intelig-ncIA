@@ -1,5 +1,6 @@
 
 
+
 import React, { useState, useEffect, useMemo } from 'react';
 import Header from './application/Header';
 import Navigation, { Page } from './application/components/Navigation';
@@ -8,6 +9,7 @@ import Utilities from './pages/Utilities';
 import DataCenter from './pages/DataCenter';
 import SINMap from './pages/SINMap';
 import GridAnalysis from './pages/GridAnalysis';
+import SolarPotential from './pages/SolarPotential';
 import Financials from './pages/Financials';
 import Configuration from './pages/Configuration';
 import OpenEnergy from './pages/OpenEnergy';
@@ -358,6 +360,8 @@ const App: React.FC = () => {
         return <SINMap />;
       case 'Grid Analysis':
         return <GridAnalysis />;
+      case 'Solar Potential':
+        return <SolarPotential />;
       case 'Open Energy':
         return <OpenEnergy />;
       case 'EnerTradeZK':

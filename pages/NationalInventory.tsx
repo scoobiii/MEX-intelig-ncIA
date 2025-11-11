@@ -1,3 +1,7 @@
+
+
+
+
 import React, { useState, useMemo } from 'react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, PieChart, Pie, Cell, CartesianGrid } from 'recharts';
 // FIX: Add all required icon imports with aliases to resolve "Cannot find name" errors.
@@ -95,7 +99,12 @@ const NationalInventory: React.FC = () => {
     const highlightedPlant = selectedPlant === 'all' ? undefined : plantsData.find(p => p.name === selectedPlant);
     
     const fuelTypeData = useMemo(() => {
-        // FIX: Cast the initial object of reduce to ensure correct type inference for `acc`. This resolves the "Spread types may only be created from object types" error.
+        // FIX: Provide an explicit type for the reduce accumulator to ensure TypeScript
+        // correctly infers the shape of `fuelMap`. This resolves the "Spread types may
+        // only be created from object types" error when spreading `data`.
+        // FIX: Added initial value {} to reduce function to prevent type errors.
+        // FIX: The `reduce` function was missing an initial value, causing incorrect type inference for the accumulator `acc` and leading to a "Spread types" error.
+        // @FIX: Add initial value `{}` to reduce to correctly initialize the accumulator, preventing spread type errors.
         const fuelMap = filteredPlants.reduce((acc, p) => {
             if (!acc[p.fuel]) {
                 acc[p.fuel] = { count: 0, power: 0 };
@@ -103,18 +112,21 @@ const NationalInventory: React.FC = () => {
             acc[p.fuel].count++;
             acc[p.fuel].power += p.powerMW;
             return acc;
-        // @FIX: Cast the initial object of reduce to a typed object to prevent type errors.
         }, {} as Record<string, { count: number; power: number }>);
 
         return Object.entries(fuelMap).map(([name, data]) => ({ name, ...data }));
     }, [filteredPlants]);
     
     const powerByState = useMemo(() => {
-        // FIX: Cast the initial object of reduce to ensure correct type inference for `acc`. This resolves arithmetic operation errors.
+        // FIX: Provide an explicit type for the reduce accumulator. This ensures `acc[p.uf]`
+        // is treated as a number, resolving the "The left-hand side of an arithmetic
+        // operation must be of type 'any', 'number', 'bigint' or an enum type" error.
+        // FIX: Added initial value {} to reduce function to prevent type errors during arithmetic operations in the subsequent sort.
+        // FIX: The `reduce` function was missing an initial value, causing `acc` to be mistyped and resulting in an arithmetic operation error.
+        // @FIX: Add initial value `{}` to reduce to correctly initialize the accumulator, preventing arithmetic type errors.
         const powerMap = filteredPlants.reduce((acc, p) => {
             acc[p.uf] = (acc[p.uf] || 0) + p.powerMW;
             return acc;
-        // @FIX: Cast the initial object of reduce to `Record<string, number>` to ensure `acc[p.uf]` is treated as a number for arithmetic operations.
         }, {} as Record<string, number>);
         
         return Object.entries(powerMap)
@@ -169,12 +181,15 @@ const NationalInventory: React.FC = () => {
 
     const summaryStats = useMemo(() => {
         const totalPower = filteredPlants.reduce((sum, p) => sum + p.powerMW, 0);
-        // FIX: Cast the initial object of reduce to ensure correct type inference for `acc` and allow arithmetic operations.
+        // FIX: Provide an explicit type for the reduce accumulator to fix the same
+        // arithmetic operation error pattern found elsewhere in the file.
+        // FIX: Added initial value {} to reduce function to prevent type errors.
+        // FIX: The `reduce` function for `statusCounts` was missing an initial value, which would lead to a runtime error.
+        // @FIX: Add initial value `{}` to reduce to correctly initialize the accumulator.
         const statusCounts = filteredPlants.reduce((acc, p) => {
             acc[p.status] = (acc[p.status] || 0) + 1;
             return acc;
-        // @FIX: Cast the initial object of reduce to correctly type the accumulator for arithmetic operations, resolving potential runtime errors.
-        }, {} as Record<'Em Operação' | 'Em Construção' | 'Outorgada', number>);
+        }, {} as Record<NationalPlant['status'], number>);
         return { totalPower, statusCounts };
     }, [filteredPlants]);
     

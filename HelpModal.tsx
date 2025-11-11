@@ -63,12 +63,52 @@ const TutorialContent: React.FC = () => (
 
 const GlossaryContent: React.FC = () => (
      <div>
-        <h3 className="text-xl font-bold text-white mb-4">Glossário</h3>
-        <div className="space-y-4">
-            <p><strong>PUE (Power Usage Effectiveness):</strong> Uma métrica que descreve a eficiência energética de um data center. Quanto mais próximo de 1.0, mais eficiente é o data center.</p>
-            <p><strong>Trigeração:</strong> Produção simultânea de eletricidade, calor e frio a partir de uma única fonte de combustível, aumentando drasticamente a eficiência geral do sistema.</p>
-            <p><strong>TIAC (Turbine Inlet Air Cooling):</strong> Sistema que resfria o ar de admissão da turbina a gás, aumentando a densidade do ar e, consequentemente, a potência e a eficiência da turbina.</p>
-            <p><strong>Diagrama de Sankey:</strong> Um tipo de fluxograma em que a largura das setas é mostrada proporcionalmente à quantidade de fluxo, ideal para visualizar fluxos de energia ou materiais.</p>
+        <h3 className="text-xl font-bold text-white mb-4">Glossário e Análise Estratégica</h3>
+        <div className="space-y-6 text-gray-300">
+             <div>
+                <h4 className="font-semibold text-lg text-cyan-400 mb-2">Termos da Plataforma</h4>
+                <div className="space-y-3 text-sm">
+                    <p><strong>PUE (Power Usage Effectiveness):</strong> Uma métrica que descreve a eficiência energética de um data center. Quanto mais próximo de 1.0, mais eficiente é o data center.</p>
+                    <p><strong>Trigeração:</strong> Produção simultânea de eletricidade, calor e frio a partir de uma única fonte de combustível, aumentando drasticamente a eficiência geral do sistema.</p>
+                    <p><strong>TIAC (Turbine Inlet Air Cooling):</strong> Sistema que resfria o ar de admissão da turbina a gás, aumentando a densidade do ar e, consequentemente, a potência e a eficiência da turbina.</p>
+                    <p><strong>Diagrama de Sankey:</strong> Um tipo de fluxograma em que a largura das setas é mostrada proporcionalmente à quantidade de fluxo, ideal para visualizar fluxos de energia ou materiais.</p>
+                </div>
+            </div>
+
+            <div className="border-t border-gray-700 pt-4">
+                <h4 className="font-semibold text-lg text-cyan-400 mb-2">Análise Comparativa e Estratégica</h4>
+
+                <div className="mt-4 bg-gray-900/50 p-4 rounded-lg">
+                    <p className="font-semibold text-white">Por que a China, com dimensões continentais similares, tem perdas elétricas muito menores (6% vs. 16%) que o Brasil?</p>
+                    <ul className="list-disc list-inside space-y-2 mt-2 text-sm">
+                        <li><strong>Geração Próxima ao Consumo:</strong> Grandes centros industriais e populacionais da China foram desenvolvidos com geração de energia local massiva, ao contrário do modelo brasileiro, que depende de hidrelétricas remotas.</li>
+                        <li><strong>Investimento Massivo em UHVDC:</strong> A China investiu mais de US$ 95 bilhões em linhas de transmissão de Ultra-Alta Tensão (UHVDC), que reduzem as perdas em longas distâncias para menos de 3%, comparado a 7-10% em linhas de corrente alternada (AC) equivalentes.</li>
+                        <li><strong>Rede Moderna e Inteligente (Smart Grid):</strong> A rede chinesa é mais nova, digitalizada e automatizada, permitindo um monitoramento e balanceamento de carga muito mais preciso, o que minimiza perdas técnicas.</li>
+                        <li><strong>Gestão Centralizada e Agressiva:</strong> A State Grid Corporation of China (SGCC) opera com um mandato para eficiência máxima, implementando rapidamente novas tecnologias e padrões rigorosos de manutenção.</li>
+                        <li><strong>Combate a Perdas Não-Técnicas:</strong> Medição inteligente e políticas rigorosas reduziram drasticamente o furto de energia ("gatos"), que ainda é um problema significativo no Brasil.</li>
+                    </ul>
+                </div>
+
+                <div className="mt-4 bg-gray-900/50 p-4 rounded-lg">
+                    <p className="font-semibold text-white">Onde aprender na China e qual seria o custo/benefício para o Brasil?</p>
+                    <ul className="list-disc list-inside space-y-2 mt-2 text-sm">
+                        <li><strong>Onde Aprender:</strong> O principal alvo é a <strong>State Grid Corporation of China (SGCC)</strong> em Pequim. A visita técnica deve focar nos seus centros de P&D em tecnologia UHVDC e na operação dos centros de controle de Smart Grid.</li>
+                        <li><strong>CAPEX Estimado para o Brasil:</strong> Um programa de modernização similar, focado em UHVDC e smart grids, exigiria um investimento na ordem de <strong>US$ 50 a US$ 100 bilhões</strong> distribuídos ao longo de 10-15 anos.</li>
+                        <li><strong>OPEX:</strong> Aumentaria nos primeiros anos devido à implantação e treinamento, mas reduziria a longo prazo com a automação e a diminuição de falhas e custos de manutenção corretiva.</li>
+                        <li><strong>ROI para o Brasil:</strong> O retorno é de longo prazo (15-20 anos). Os benefícios são sistêmicos: redução do "Custo Brasil", aumento da competitividade industrial, atração de indústrias eletro-intensivas (como data centers) e maior segurança energética.</li>
+                        <li><strong>Impacto no Consumo e PIB:</strong> Uma rede mais confiável e barata poderia destravar um aumento do consumo per capita em <strong>~15-25%</strong> e adicionar de <strong>0.5% a 1%</strong> ao crescimento anual do PIB per capita, ao viabilizar novos setores industriais.</li>
+                    </ul>
+                </div>
+
+                <div className="mt-4 bg-gray-900/50 p-4 rounded-lg">
+                    <p className="font-semibold text-white">Qual o ROI para as distribuidoras de energia?</p>
+                     <ul className="list-disc list-inside space-y-2 mt-2 text-sm">
+                        <li><strong>Retorno Direto:</strong> O benefício é imediato. Cada 1% de redução nas perdas técnicas e não-técnicas se traduz diretamente em aumento de receita, pois a distribuidora deixa de pagar por uma energia que "vaza" do sistema antes de ser faturada.</li>
+                        <li><strong>ROI Estimado:</strong> Para as distribuidoras, o ROI de investimentos em medição inteligente e modernização da rede de distribuição é muito mais rápido, estimado entre <strong>5 a 7 anos</strong>.</li>
+                        <li><strong>Benefícios Adicionais:</strong> Redução de custos operacionais com equipes de campo (leitura e corte/religação remotos), maior estabilidade da rede (menos multas por interrupção), e a possibilidade de oferecer novos serviços de gestão de energia aos clientes.</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
 );
@@ -182,16 +222,16 @@ const ProjectStatusContent: React.FC = () => (
 const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
-  const [activeTab, setActiveTab] = useState<HelpTab>('status');
+  const [activeTab, setActiveTab] = useState<HelpTab>('glossary');
 
   const tabs: { id: HelpTab, label: string }[] = [
+      { id: 'status', label: 'Status do Projeto' },
       { id: 'tutorial', label: 'Tutorial' },
       { id: 'user', label: 'Guia do Usuário' },
       { id: 'glossary', label: 'Glossário' },
       { id: 'newAsset', label: 'Novo Ativo' },
       { id: 'partners', label: 'Parceiros e Investidores' },
       { id: 'devops', label: 'Guia DevOps' },
-      { id: 'status', label: 'Status do Projeto' },
   ];
 
   const renderContent = () => {
@@ -203,7 +243,7 @@ const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
         case 'partners': return <PartnersGuideContent />;
         case 'devops': return <DevOpsGuideContent />;
         case 'status': return <ProjectStatusContent />;
-        default: return <UserGuideContent />;
+        default: return <GlossaryContent />;
     }
   };
 
@@ -238,7 +278,7 @@ const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
         <div className="flex flex-grow min-h-0">
           <nav className="w-1/4 p-4 border-r border-gray-700 flex-shrink-0 overflow-y-auto">
             <ul className="space-y-2">
-              {tabs.sort((a, b) => a.id === 'status' ? -1 : 1).map(tab => ( // Puts Status on top
+              {tabs.map(tab => (
                   <li key={tab.id}>
                       <button 
                         onClick={() => setActiveTab(tab.id)}
