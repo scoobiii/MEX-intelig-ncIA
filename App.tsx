@@ -9,7 +9,6 @@ import Financials from './pages/Financials';
 import Configuration from './pages/Configuration';
 import OpenEnergy from './pages/OpenEnergy';
 import Chatbot from './application/Chatbot'; // Import the Chatbot component
-import BESSContainer from './pages/BESSContainer';
 import MainDashboard from './pages/MainDashboard';
 import { PlantStatus, FuelMode, TurbineStatus, Plant } from './types';
 import { POWER_PLANTS as initialPowerPlants } from './data/plants';
@@ -355,8 +354,6 @@ const App: React.FC = () => {
         />;
       case 'Open Energy':
         return <OpenEnergy />;
-      case 'BESS Container':
-        return <BESSContainer />;
       case 'EnerTradeZK':
         return <MainDashboard />;
       default:

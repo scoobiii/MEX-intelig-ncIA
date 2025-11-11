@@ -3,7 +3,6 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, PieC
 // FIX: Add all required icon imports with aliases to resolve "Cannot find name" errors.
 import { FactoryIcon as Factory, MagnifyingGlassIcon as Search, ChevronDownIcon as ChevronDown, ChevronUpIcon as ChevronUp, InfoIcon as Info, CloseIcon, BoltIcon as Power, TrendingUpIcon as TrendingUp, ChartBarIcon as BarChart3, CogIcon as Settings } from '../application/components/icons';
 import { NATIONAL_PLANTS_DATA, BRAZIL_STATES } from '../data/nationalInventory';
-import { Plant } from '../types';
 
 interface NationalPlant {
     name: string;

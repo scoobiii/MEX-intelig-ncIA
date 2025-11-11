@@ -8,7 +8,6 @@ export type Page =
     'Configuration' | 
     'Infrastructure' |
     'Open Energy' |
-    'BESS Container' |
     'EnerTradeZK';
 
 interface NavItem {
@@ -24,8 +23,7 @@ const navItems: NavItem[] = [
     { label: 'Configuração', page: 'Configuration' },
     { label: 'MAUAX', page: 'Infrastructure' },
     { label: 'Open Energy', page: 'Open Energy' },
-    { label: 'BESS Container', page: 'BESS Container' },
-    { label: 'EnerTradeZK', page: 'EnerTradeZK' },
+    { label: 'MEX Trade', page: 'EnerTradeZK' },
 ];
 
 interface NavigationProps {

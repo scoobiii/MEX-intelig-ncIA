@@ -29,12 +29,15 @@
  * GOS7 (Gang of Seven Senior Full Stack DevOps Agile Scrum Team)
  * - Claude, Grok, Gemini, Qwen, DeepSeek, GPT, Manus
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ServerRackStatus from '../application/components/ServerRackStatus';
 import PowerConsumption from '../application/components/PowerConsumption';
 import CoolingLoad from '../CoolingLoad';
 import DataCenterTreeMap from '../application/DataCenterTreeMap';
 import EnergyFlowSankey from '../application/components/EnergyFlowSankey';
+import DashboardCard from '../DashboardCard';
+import { BoltIcon } from '../application/components/icons';
+
 
 type DataCenterTab = 'overview' | 'treemap' | 'energyflow';
 type MaximizedWidget = 'treemap' | null;
@@ -42,6 +45,57 @@ type MaximizedWidget = 'treemap' | null;
 interface DataCenterProps {
   onActiveRackUpdate: (count: number) => void;
 }
+
+const BESSStatusCard: React.FC = () => {
+    const [bess, setBess] = useState({
+        status: 'Ocioso - Carga Completa',
+        charge: 100,
+    });
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setBess(prev => {
+                let newCharge = prev.charge;
+                let newStatus = prev.status;
+                if (prev.status.includes('Carregando')) {
+                    newCharge = Math.min(100, prev.charge + 5);
+                    if (newCharge === 100) newStatus = 'Ocioso - Carga Completa';
+                } else if (prev.status.includes('Descarregando')) {
+                    newCharge = Math.max(0, prev.charge - 8);
+                    if (newCharge === 0) newStatus = 'Ocioso - Descarregado';
+                } else {
+                    if (Math.random() > 0.9) newStatus = 'Descarregando (Pico)';
+                    else if (Math.random() < 0.1 && prev.charge < 90) newStatus = 'Carregando (Rede)';
+                }
+                return { status: newStatus, charge: newCharge };
+            });
+        }, 4000);
+        return () => clearInterval(interval);
+    }, []);
+
+    return (
+        <DashboardCard title="Estabilidade de Energia (BESS)" icon={<BoltIcon className="w-6 h-6 text-green-400" />}>
+            <div className="flex flex-col justify-around h-full text-center">
+                <div>
+                    <p className="text-gray-400 text-sm">Status</p>
+                    <p className="text-2xl font-bold text-green-400">{bess.status}</p>
+                </div>
+                <div className="space-y-2">
+                    <p className="text-gray-400 text-sm">Nível de Carga</p>
+                    <div className="w-full bg-gray-700 rounded-full h-6">
+                        <div className="bg-green-500 h-6 rounded-full flex items-center justify-center text-sm font-bold text-white" style={{ width: `${bess.charge}%` }}>
+                            {bess.charge.toFixed(0)}%
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <p className="text-gray-400 text-sm">Capacidade</p>
+                    <p className="text-xl font-semibold text-white">2 MWh / 500 kW</p>
+                </div>
+            </div>
+        </DashboardCard>
+    );
+};
 
 const DataCenter: React.FC<DataCenterProps> = ({ onActiveRackUpdate }) => {
   const [activeTab, setActiveTab] = useState<DataCenterTab>('overview');
@@ -107,6 +161,9 @@ const DataCenter: React.FC<DataCenterProps> = ({ onActiveRackUpdate }) => {
             </div>
             <div className="lg:col-span-1">
               <CoolingLoad />
+            </div>
+             <div className="lg:col-span-1">
+              <BESSStatusCard />
             </div>
             <div className="lg:col-span-3">
               <ServerRackStatus onRackDataUpdate={onActiveRackUpdate} />

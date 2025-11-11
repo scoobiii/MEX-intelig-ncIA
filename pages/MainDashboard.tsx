@@ -329,6 +329,72 @@ const AlertsPanel = () => {
   )
 }
 
+const GridStabilityMonitor = () => {
+    const [stability, setStability] = useState({
+      status: 'Estável',
+      reverseFlow: 2.1, // MW
+      curtailmentRisk: 'Baixo',
+      bessStatus: 'Carregando'
+    });
+  
+    useEffect(() => {
+      const interval = setInterval(() => {
+        const riskRoll = Math.random();
+        let newRisk = 'Baixo';
+        if (riskRoll > 0.9) newRisk = 'Alto';
+        else if (riskRoll > 0.7) newRisk = 'Médio';
+        
+        setStability({
+          status: newRisk === 'Alto' ? 'Alerta' : 'Estável',
+          reverseFlow: Math.max(0, 1 + (Math.random() - 0.5) * 4),
+          curtailmentRisk: newRisk as 'Baixo' | 'Médio' | 'Alto',
+          bessStatus: newRisk === 'Alto' ? 'Descarregando' : 'Carregando'
+        });
+      }, 5000);
+      return () => clearInterval(interval);
+    }, []);
+  
+    const riskColors = {
+      'Baixo': 'text-green-600',
+      'Médio': 'text-yellow-600',
+      'Alto': 'text-red-600',
+    };
+  
+    return (
+      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Monitor de Estabilidade da Rede</h3>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-center">
+          <div>
+            <p className="text-sm text-gray-600">Status da Rede</p>
+            <p className={`text-2xl font-bold ${stability.status === 'Estável' ? 'text-green-600' : 'text-red-600 animate-pulse'}`}>
+              {stability.status}
+            </p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">Fluxo Reverso</p>
+            <p className="text-2xl font-bold text-gray-900">{stability.reverseFlow.toFixed(1)} MW</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">Risco de Curtailment</p>
+            <p className={`text-2xl font-bold ${riskColors[stability.curtailmentRisk]}`}>{stability.curtailmentRisk}</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">Status BESS</p>
+            <p className="text-2xl font-bold text-blue-600">{stability.bessStatus}</p>
+          </div>
+        </div>
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <p className="text-sm font-semibold text-gray-800">Ação da IA (MEX Trade):</p>
+          <p className="text-gray-600 mt-1">
+            {stability.bessStatus === 'Carregando' 
+              ? 'Armazenando excesso de geração renovável no BESS para evitar instabilidade e perdas por curtailment.'
+              : 'Descarregando BESS para suprir pico de demanda e estabilizar a frequência da rede.'}
+          </p>
+        </div>
+      </div>
+    );
+  };
+
 // ==================== MAIN DASHBOARD ====================
 
 export default function MainDashboard() {
@@ -357,8 +423,8 @@ export default function MainDashboard() {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Dashboard EnerTradeZK</h1>
-              <p className="text-sm text-gray-600">Bem-vindo de volta! Aqui está um resumo do seu mercado.</p>
+              <h1 className="text-2xl font-bold text-gray-900">Dashboard MEX Trade</h1>
+              <p className="text-sm text-gray-600">Plataforma de Inteligência e Operações no Mercado de Energia.</p>
             </div>
             <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
               Atualizar dados
@@ -426,6 +492,11 @@ export default function MainDashboard() {
               <RecommendationCard key={rec.id} rec={rec} />
             ))}
           </div>
+        </div>
+        
+        {/* Grid Stability */}
+        <div className="mb-8">
+            <GridStabilityMonitor />
         </div>
 
         {/* Alerts */}
