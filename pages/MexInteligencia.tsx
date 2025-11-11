@@ -23,7 +23,7 @@ const BulletPoint: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     </li>
 );
 
-const MexInteligencia: React.FC<{ t: (key: string) => string }> = ({ t }) => {
+const MexInteligencia: React.FC = () => {
     return (
         <div className="mt-6 text-gray-200">
              <style>{`

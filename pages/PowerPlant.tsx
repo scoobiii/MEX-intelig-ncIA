@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
     PlantStatus, 
@@ -13,15 +12,15 @@ import {
 } from '../types';
 import { TurbineStatusConfig, ResourceConfig } from '../App';
 
-import PowerOutput from '../components/PowerOutput';
-import FuelStatus from '../components/FuelStatus';
-import EmissionsMonitor from '../components/EmissionsMonitor';
-import TurbineStatus from '../components/TurbineStatus';
-import MainTurbineMonitor from '../components/MainTurbineMonitor';
-import HistoricalData from '../components/HistoricalData';
-import ResourceManagement from '../components/ResourceManagement';
-import NuclearPlantInfo from '../components/NuclearPlantInfo';
-import NuclearProjectAnalysis from '../components/NuclearProjectAnalysis';
+import PowerOutput from '../application/components/PowerOutput';
+import FuelStatus from '../application/components/FuelStatus';
+import EmissionsMonitor from '../application/EmissionsMonitor';
+import TurbineStatus from '../application/components/TurbineStatus';
+import MainTurbineMonitor from '../application/components/MainTurbineMonitor';
+import HistoricalData from '../application/components/HistoricalData';
+import ResourceManagement from '../application/components/ResourceManagement';
+import NuclearPlantInfo from '../application/components/NuclearPlantInfo';
+import NuclearProjectAnalysis from '../application/components/NuclearProjectAnalysis';
 
 // --- PROPS INTERFACE ---
 interface PowerPlantProps {
@@ -36,7 +35,6 @@ interface PowerPlantProps {
   turbineMaintenanceScores: { [key: number]: number };
   setTurbineMaintenanceScores: React.Dispatch<React.SetStateAction<{ [key: number]: number }>>;
   resourceConfig: ResourceConfig;
-  t: (key: string) => string;
 }
 
 export interface ResourceDataPoint {
@@ -112,7 +110,6 @@ const PowerPlant: React.FC<PowerPlantProps> = ({
     turbineMaintenanceScores,
     setTurbineMaintenanceScores,
     resourceConfig,
-    t,
 }) => {
     // --- STATE MANAGEMENT ---
     const [maximizedStates, setMaximizedStates] = useState<Record<WidgetKey, boolean>>({
@@ -162,7 +159,7 @@ const PowerPlant: React.FC<PowerPlantProps> = ({
 
     // Update emissions based on fuel mode changes
     useEffect(() => {
-        if (plantStatus !== PlantStatus.Online || fuelMode === FuelMode.Nuclear) {
+        if (plantStatus !== PlantStatus.Online || fuelMode === FuelMode.Nuclear || fuelMode === FuelMode.SolarBess || fuelMode === FuelMode.WindBess) {
             setEmissions({ nox: 0, sox: 0, co: 0, particulates: 0 });
             // Also set historical to 0 for consistency
             setHistoricalEmissions(Array.from({ length: 7 }, (_, i) => ({
@@ -386,7 +383,6 @@ const PowerPlant: React.FC<PowerPlantProps> = ({
                         isMaximizable
                         isMaximized={maximizedStates.power}
                         onToggleMaximize={() => toggleMaximize('power')}
-                        t={t}
                     />
                 </div>
                 <div className={maximizedStates.fuel ? "col-span-12" : "col-span-12 md:col-span-6 lg:col-span-3 h-full"}>
@@ -401,7 +397,6 @@ const PowerPlant: React.FC<PowerPlantProps> = ({
                         historicalData={historicalData}
                         timeRange={timeRange}
                         setTimeRange={setTimeRange}
-                        t={t}
                     />
                 </div>
                 <div className={maximizedStates.emissions ? "col-span-12" : "col-span-12 md:col-span-6 lg:col-span-3 h-full"}>
@@ -410,7 +405,6 @@ const PowerPlant: React.FC<PowerPlantProps> = ({
                             isMaximizable
                             isMaximized={maximizedStates.emissions}
                             onToggleMaximize={() => toggleMaximize('emissions')}
-                            t={t}
                         />
                     ) : (
                         <EmissionsMonitor 
@@ -422,7 +416,6 @@ const PowerPlant: React.FC<PowerPlantProps> = ({
                             isMaximizable
                             isMaximized={maximizedStates.emissions}
                             onToggleMaximize={() => toggleMaximize('emissions')}
-                            t={t}
                         />
                     )}
                 </div>
@@ -434,7 +427,6 @@ const PowerPlant: React.FC<PowerPlantProps> = ({
                         isMaximizable
                         isMaximized={maximizedStates.resources}
                         onToggleMaximize={() => toggleMaximize('resources')}
-                        t={t}
                     />
                 </div>
                 
@@ -449,7 +441,6 @@ const PowerPlant: React.FC<PowerPlantProps> = ({
                         turbineTypeFilter={turbineTypeFilter}
                         setTurbineTypeFilter={setTurbineTypeFilter}
                         onPerformMaintenance={handlePerformMaintenance}
-                        t={t}
                     />
                 </div>
 
@@ -461,12 +452,11 @@ const PowerPlant: React.FC<PowerPlantProps> = ({
                         isMaximizable
                         isMaximized={maximizedStates.history}
                         onToggleMaximize={() => toggleMaximize('history')}
-                        t={t}
                     />
                 </div>
                 {fuelMode === FuelMode.Nuclear && (
                     <div className="col-span-12 mt-6">
-                        <NuclearProjectAnalysis t={t} />
+                        <NuclearProjectAnalysis />
                     </div>
                 )}
             </div>
@@ -476,7 +466,6 @@ const PowerPlant: React.FC<PowerPlantProps> = ({
                     onClose={() => setSelectedTurbineId(null)}
                     allTurbines={turbines}
                     totalPowerOutput={powerOutput}
-                    t={t}
                 />
             )}
         </div>

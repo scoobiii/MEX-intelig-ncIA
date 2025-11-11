@@ -1,4 +1,3 @@
-
 /**
  * @file DataCenter.tsx
  * @description Main page component for the Data Center monitoring dashboard, managing tab navigation between Overview and Treemap views, and handling widget maximization state.
@@ -31,21 +30,20 @@
  * - Claude, Grok, Gemini, Qwen, DeepSeek, GPT, Manus
  */
 import React, { useState } from 'react';
-import ServerRackStatus from '../components/ServerRackStatus';
-import PowerConsumption from '../components/PowerConsumption';
-import CoolingLoad from '../components/CoolingLoad';
-import DataCenterTreeMap from '../components/DataCenterTreeMap';
-import EnergyFlowSankey from '../components/EnergyFlowSankey';
+import ServerRackStatus from '../application/components/ServerRackStatus';
+import PowerConsumption from '../application/components/PowerConsumption';
+import CoolingLoad from '../CoolingLoad';
+import DataCenterTreeMap from '../application/DataCenterTreeMap';
+import EnergyFlowSankey from '../application/components/EnergyFlowSankey';
 
 type DataCenterTab = 'overview' | 'treemap' | 'energyflow';
 type MaximizedWidget = 'treemap' | null;
 
 interface DataCenterProps {
   onActiveRackUpdate: (count: number) => void;
-  t: (key: string) => string;
 }
 
-const DataCenter: React.FC<DataCenterProps> = ({ onActiveRackUpdate, t }) => {
+const DataCenter: React.FC<DataCenterProps> = ({ onActiveRackUpdate }) => {
   const [activeTab, setActiveTab] = useState<DataCenterTab>('overview');
   const [maximizedWidget, setMaximizedWidget] = useState<MaximizedWidget>(null);
 
@@ -68,7 +66,6 @@ const DataCenter: React.FC<DataCenterProps> = ({ onActiveRackUpdate, t }) => {
           isMaximizable 
           isMaximized={true}
           onToggleMaximize={() => toggleMaximize('treemap')}
-          t={t}
         />
       </div>
     );
@@ -83,21 +80,21 @@ const DataCenter: React.FC<DataCenterProps> = ({ onActiveRackUpdate, t }) => {
             className={tabButtonClasses('overview')}
             aria-current={activeTab === 'overview' ? 'page' : undefined}
           >
-            {t('dataCenter.overview')}
+            Visão Geral
           </button>
           <button
             onClick={() => setActiveTab('treemap')}
             className={tabButtonClasses('treemap')}
             aria-current={activeTab === 'treemap' ? 'page' : undefined}
           >
-            {t('dataCenter.treemap')}
+            Treemap de Consumo
           </button>
           <button
             onClick={() => setActiveTab('energyflow')}
             className={tabButtonClasses('energyflow')}
             aria-current={activeTab === 'energyflow' ? 'page' : undefined}
           >
-            {t('dataCenter.energyFlow')}
+            Fluxo de Energia
           </button>
         </nav>
       </div>
@@ -106,13 +103,13 @@ const DataCenter: React.FC<DataCenterProps> = ({ onActiveRackUpdate, t }) => {
         {activeTab === 'overview' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fadeIn">
             <div className="lg:col-span-1">
-              <PowerConsumption t={t} />
+              <PowerConsumption />
             </div>
             <div className="lg:col-span-1">
-              <CoolingLoad t={t} />
+              <CoolingLoad />
             </div>
             <div className="lg:col-span-3">
-              <ServerRackStatus onRackDataUpdate={onActiveRackUpdate} t={t} />
+              <ServerRackStatus onRackDataUpdate={onActiveRackUpdate} />
             </div>
           </div>
         )}
@@ -122,13 +119,12 @@ const DataCenter: React.FC<DataCenterProps> = ({ onActiveRackUpdate, t }) => {
               isMaximizable
               isMaximized={false}
               onToggleMaximize={() => toggleMaximize('treemap')}
-              t={t}
             />
           </div>
         )}
         {activeTab === 'energyflow' && (
             <div className="animate-fadeIn">
-                <EnergyFlowSankey t={t} />
+                <EnergyFlowSankey />
             </div>
         )}
       </div>

@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import DashboardCard from '../components/DashboardCard';
-import ThermalPlantsSummary from '../components/ThermalPlantsSummary';
-import PlantsMap from '../components/PlantsMap';
-import { WrenchScrewdriverIcon, PlusIcon, FactoryIcon } from '../components/icons';
+import DashboardCard from '../DashboardCard';
+import ThermalPlantsSummary from '../application/components/ThermalPlantsSummary';
+import PlantsMap from '../application/components/PlantsMap';
+import { WrenchScrewdriverIcon, PlusIcon, FactoryIcon } from '../application/components/icons';
 import { FuelMode, Plant, PlantStatus, Turbine, TurbineStatus as TurbineStatusEnum } from '../types';
 import { TurbineStatusConfig, ResourceConfig } from '../App';
 
@@ -34,7 +34,6 @@ interface ConfigurationProps {
   updatePlant: (plantNameToUpdate: string, updatedPlant: Plant) => void;
   resourceConfig: ResourceConfig;
   setResourceConfig: (config: ResourceConfig) => void;
-  t: (key: string) => string;
 }
 
 const Configuration: React.FC<ConfigurationProps> = ({
@@ -55,7 +54,6 @@ const Configuration: React.FC<ConfigurationProps> = ({
   updatePlant,
   resourceConfig,
   setResourceConfig,
-  t,
 }) => {
   const selectedPlantRaw = availablePlants.find(p => p.name === selectedPlantName);
 
@@ -67,8 +65,7 @@ const Configuration: React.FC<ConfigurationProps> = ({
         ...selectedPlantRaw,
         identifier: {
           type: 'location' as 'location' | 'license',
-          // FIX: Use `locationKey` and set `valueKey` as required by the `Plant` type.
-          valueKey: selectedPlantRaw.locationKey || 'plants.identifier.notDefined',
+          valueKey: selectedPlantRaw.locationKey || 'Não definido',
         }
       };
     }
@@ -122,7 +119,6 @@ const Configuration: React.FC<ConfigurationProps> = ({
   const handlePlantUpdate = (field: keyof Plant | `identifier.${keyof NonNullable<Plant['identifier']>}`, value: string) => {
     if (!selectedPlant || !selectedPlantRaw) return;
 
-    // FIX: Ensure updatedPlant is a valid Plant object.
     let updatedPlant: Plant = { ...selectedPlant };
     
     if (field.startsWith('identifier.')) {
@@ -135,7 +131,6 @@ const Configuration: React.FC<ConfigurationProps> = ({
         } else {
             updatedPlant.identifier = {
                 ...updatedPlant.identifier!,
-                // FIX: Update `valueKey` instead of the non-existent `value` property.
                 valueKey: value,
             };
         }
@@ -143,16 +138,13 @@ const Configuration: React.FC<ConfigurationProps> = ({
         const numValue = parseFloat(value);
         updatedPlant.power = isNaN(numValue) ? 0 : numValue;
     } else {
-        // FIX: Ensure that only valid keys of Plant are updated.
         (updatedPlant[field as keyof Plant] as any) = value;
     }
     
     if (field === 'name') {
-        // FIX: Pass a valid Plant object to `updatePlant`.
         updatePlant(selectedPlantRaw.name, updatedPlant);
         setSelectedPlantName(value);
     } else {
-        // FIX: Pass a valid Plant object to `updatePlant`.
         updatePlant(selectedPlantRaw.name, updatedPlant);
     }
   };
@@ -168,7 +160,7 @@ const Configuration: React.FC<ConfigurationProps> = ({
     });
   };
 
-  const FormInput: React.FC<{label: string, value: string, name: keyof Plant, type?: string}> = ({ label, value, name, type = 'text' }) => (
+  const FormInput: React.FC<{label: string, value: string, name: keyof Plant | `identifier.${keyof NonNullable<Plant['identifier']>}`, type?: string}> = ({ label, value, name, type = 'text' }) => (
       <div>
           <label className="block text-sm font-medium text-gray-400 mb-1">{label}</label>
           <input
@@ -181,22 +173,22 @@ const Configuration: React.FC<ConfigurationProps> = ({
   );
 
   const resourceLabels: { [key in keyof ResourceConfig]: string } = {
-    water: t('config.water'),
-    gas: t('config.gas'),
-    ethanol: t('config.ethanol'),
-    biodiesel: t('config.biodiesel'),
-    h2: t('config.h2'),
+    water: 'Água',
+    gas: 'Gás',
+    ethanol: 'Etanol',
+    biodiesel: 'Biodiesel',
+    h2: 'Hidrogênio',
   };
 
   return (
     <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
       
       <div className="flex flex-col gap-6 lg:col-span-1">
-        <DashboardCard title={t('config.title')} icon={<WrenchScrewdriverIcon className="w-6 h-6" />}>
+        <DashboardCard title={'Configuração Geral'} icon={<WrenchScrewdriverIcon className="w-6 h-6" />}>
           <div className="space-y-4">
             <div>
               <label htmlFor="plant-select" className="block text-sm font-medium text-gray-300 mb-1">
-                {t('config.selectProject')}
+                {'Selecionar Projeto'}
               </label>
               <select
                 id="plant-select"
@@ -214,7 +206,7 @@ const Configuration: React.FC<ConfigurationProps> = ({
             
             <div>
               <label htmlFor="fuel-select" className="block text-sm font-medium text-gray-300 mb-1">
-                {t('config.fuelMode')}
+                {'Modo de Combustível'}
               </label>
               <select
                 id="fuel-select"
@@ -234,12 +226,12 @@ const Configuration: React.FC<ConfigurationProps> = ({
           {(showH2Slider || showBiodieselSlider) && (
             <div className="space-y-4 pt-4 mt-4 border-t border-gray-700">
               <h4 className="text-sm font-medium text-gray-300 mb-1">
-                {t('config.flexMix')}
+                {'Ajuste do Mix Flexível'}
               </h4>
               {showH2Slider && (
                 <div>
                   <div className="flex justify-between items-center mb-1">
-                    <label htmlFor="h2MixConfig" className="text-sm font-medium text-gray-300">{t('config.hydrogen')}</label>
+                    <label htmlFor="h2MixConfig" className="text-sm font-medium text-gray-300">{'Hidrogênio (H₂)'}</label>
                     <span className="text-lg font-mono font-semibold text-emerald-400">{flexMix.h2}%</span>
                   </div>
                   <input type="range" id="h2MixConfig" min="0" max="100" value={flexMix.h2}
@@ -250,7 +242,7 @@ const Configuration: React.FC<ConfigurationProps> = ({
               {showBiodieselSlider && (
                 <div>
                   <div className="flex justify-between items-center mb-1">
-                    <label htmlFor="biodieselMixConfig" className="text-sm font-medium text-gray-300">{t('config.biodiesel')}</label>
+                    <label htmlFor="biodieselMixConfig" className="text-sm font-medium text-gray-300">{'Biodiesel'}</label>
                     <span className="text-lg font-mono font-semibold text-green-500">{flexMix.biodiesel}%</span>
                   </div>
                   <input type="range" id="biodieselMixConfig" min="0" max="100" value={flexMix.biodiesel}
@@ -262,9 +254,9 @@ const Configuration: React.FC<ConfigurationProps> = ({
           )}
         </DashboardCard>
         
-         <DashboardCard title={t('config.resourceTitle')} icon={<WrenchScrewdriverIcon className="w-6 h-6"/>}>
+         <DashboardCard title={'Visibilidade de Recursos'} icon={<WrenchScrewdriverIcon className="w-6 h-6"/>}>
             <div className="space-y-3">
-                <p className="text-xs text-gray-400">{t('config.resourceDescription')}</p>
+                <p className="text-xs text-gray-400">{'Controle quais recursos são exibidos no painel de gestão. As opções são habilitadas com base no Modo de Combustível selecionado.'}</p>
                 {Object.keys(resourceConfig).map((key) => {
                     const resourceKey = key as keyof ResourceConfig;
                     const isDisabled = resourceKey !== 'water';
@@ -288,27 +280,27 @@ const Configuration: React.FC<ConfigurationProps> = ({
          </DashboardCard>
 
         {selectedPlant && (
-            <DashboardCard title={t('config.projectDetailsTitle')} icon={<FactoryIcon className="w-6 h-6" />}>
+            <DashboardCard title={'Detalhes do Projeto'} icon={<FactoryIcon className="w-6 h-6" />}>
                 <div className="space-y-3">
-                    <FormInput label={t('config.projectName')} value={selectedPlant.name} name="name" />
-                    <FormInput label={t('config.powerMW')} value={String(selectedPlant.power)} name="power" type="number" />
+                    <FormInput label={'Nome do Projeto'} value={selectedPlant.name} name="name" />
+                    <FormInput label={'Potência (MW)'} value={String(selectedPlant.power)} name="power" type="number" />
                     
                     <div>
-                        <label className="block text-sm font-medium text-gray-400 mb-2">{t('config.identifierType')}</label>
+                        <label className="block text-sm font-medium text-gray-400 mb-2">{'Tipo de Identificador'}</label>
                         <div className="flex gap-4">
                             <label className="flex items-center gap-2 text-sm text-gray-300">
                                 <input type="radio" name="identifierType" value="location" 
                                     checked={selectedPlant.identifier.type === 'location'}
                                     onChange={() => handlePlantUpdate('identifier.type', 'location')}
                                     className="w-4 h-4 text-cyan-600 bg-gray-700 border-gray-500 focus:ring-cyan-500" />
-                                {t('config.location')}
+                                {'Localização'}
                             </label>
                             <label className="flex items-center gap-2 text-sm text-gray-300">
                                 <input type="radio" name="identifierType" value="license"
                                     checked={selectedPlant.identifier.type === 'license'}
                                     onChange={() => handlePlantUpdate('identifier.type', 'license')}
                                     className="w-4 h-4 text-cyan-600 bg-gray-700 border-gray-500 focus:ring-cyan-500" />
-                                {t('config.license')}
+                                {'Licença'}
                             </label>
                         </div>
                     </div>
@@ -316,21 +308,16 @@ const Configuration: React.FC<ConfigurationProps> = ({
                           <input
                               type="text"
                               placeholder={selectedPlant.identifier.type === 'location' ? 'Ex: São Paulo, SP' : 'Ex: ANEEL 12345-6'}
-                              // FIX: Use `valueKey` from identifier, not `value`.
                               value={selectedPlant.identifier.valueKey}
-                              // FIX: Update `identifier.valueKey` on change.
                               onChange={(e) => handlePlantUpdate('identifier.valueKey', e.target.value)}
                               className="w-full bg-gray-900/50 border border-gray-600 text-white text-sm rounded-lg focus:ring-cyan-500 focus:border-cyan-500 block p-2"
                           />
                       </div>
-                    {/* FIX: Use `fuelKey` instead of `fuel`. */}
-                    <FormInput label={t('config.mainFuelType')} value={selectedPlant.fuelKey} name="fuelKey" />
+                    <FormInput label={'Tipo Principal de Combustível'} value={selectedPlant.fuelKey} name="fuelKey" />
                      <div>
-                        <label className="block text-sm font-medium text-gray-400 mb-1">{t('config.description')}</label>
+                        <label className="block text-sm font-medium text-gray-400 mb-1">{'Descrição'}</label>
                         <textarea
-                            // FIX: Use `descriptionKey` instead of `description`.
                             value={selectedPlant.descriptionKey || ''}
-                            // FIX: Update `descriptionKey` on change.
                             onChange={(e) => handlePlantUpdate('descriptionKey', e.target.value)}
                             className="w-full h-24 bg-gray-900/50 border border-gray-600 text-white text-sm rounded-lg focus:ring-cyan-500 focus:border-cyan-500 block p-2"
                         />
@@ -342,10 +329,10 @@ const Configuration: React.FC<ConfigurationProps> = ({
       </div>
       
       <div className="lg:col-span-1">
-        <DashboardCard title={t('config.controlsTitle')} icon={<WrenchScrewdriverIcon className="w-6 h-6"/>}>
+        <DashboardCard title={'Controles da Usina'} icon={<WrenchScrewdriverIcon className="w-6 h-6"/>}>
           <div className="space-y-6">
             <div>
-              <h4 className="font-semibold text-gray-300 mb-2">{t('config.plantStatus')}</h4>
+              <h4 className="font-semibold text-gray-300 mb-2">{'Status da Usina'}</h4>
               <div className="flex items-center bg-gray-900/50 rounded-lg p-1">
                 {Object.values(PlantStatus).map((status) => (
                   <button key={status} onClick={() => setPlantStatus(status)}
@@ -356,31 +343,31 @@ const Configuration: React.FC<ConfigurationProps> = ({
             </div>
 
             <div>
-              <h4 className="font-semibold text-gray-300 mb-2">{t('config.turbineStatus')}</h4>
+              <h4 className="font-semibold text-gray-300 mb-2">{'Status das Turbinas'}</h4>
               <div className="flex items-center gap-2 mb-3 flex-wrap">
-                  <span className="text-sm text-gray-400">{t('config.filter')}</span>
+                  <span className="text-sm text-gray-400">{'Filtrar:'}</span>
                   {(['all', 'Ciclo Combinado', 'Ciclo Rankine'] as TurbineType[]).map(type => (
                       <button key={type} onClick={() => setTurbineTypeFilter(type)}
                           className={`px-2 py-1 text-xs font-semibold rounded-md transition-all ${ turbineTypeFilter === type ? 'bg-cyan-500 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
-                      >{type === 'all' ? t('config.all') : t(type === 'Ciclo Combinado' ? 'config.combinedCycle' : 'config.rankineCycle')}</button>
+                      >{type === 'all' ? 'Todas' : type}</button>
                   ))}
               </div>
               <div className="space-y-2 max-h-96 overflow-y-auto pr-2">
                   {filteredTurbines.map(turbine => (
                       <div key={turbine.id} className="bg-gray-700/50 p-3 rounded-lg flex flex-col gap-2">
                         <div className="flex items-center justify-between">
-                            <span className="font-medium text-white text-sm">{t('config.turbineId').replace('{id}', String(turbine.id))} <span className="text-gray-400 text-xs">({turbine.type})</span></span>
+                            <span className="font-medium text-white text-sm">Turbina #{turbine.id} <span className="text-gray-400 text-xs">({turbine.type})</span></span>
                             <div className="flex items-center bg-gray-900/50 rounded-md p-0.5">
                                 {(['active', 'inactive', 'error'] as TurbineStatusEnum[]).map(status => (
                                     <button key={status} onClick={() => handleTurbineStatusChange(turbine.id, status)}
                                     className={`px-2 py-0.5 text-xs font-semibold rounded transition-all ${ turbineStatusConfig[turbine.id] === status ? 'bg-cyan-500 text-white shadow-sm' : 'text-gray-400 hover:bg-gray-600'}`}
-                                    >{status === 'active' ? t('config.active') : status === 'inactive' ? t('config.inactive') : t('config.error')}</button>
+                                    >{status === 'active' ? 'Ativa' : status === 'inactive' ? 'Inativa' : 'Erro'}</button>
                                 ))}
                             </div>
                         </div>
                         <div>
                           <div className="flex justify-between items-center mb-1">
-                            <label htmlFor={`maintenance-score-${turbine.id}`} className="text-xs text-gray-400">{t('config.maintenanceScore')}</label>
+                            <label htmlFor={`maintenance-score-${turbine.id}`} className="text-xs text-gray-400">{'Pontuação de Manutenção'}</label>
                             <span className="text-sm font-mono font-semibold text-white">{turbineMaintenanceScores[turbine.id] || 0}</span>
                           </div>
                             <input 
@@ -403,24 +390,24 @@ const Configuration: React.FC<ConfigurationProps> = ({
           </div>
         </DashboardCard>
          <div className="mt-6">
-            <DashboardCard title={t('config.projectManagementTitle')} icon={<WrenchScrewdriverIcon className="w-6 h-6"/>}>
+            <DashboardCard title={'Gerenciamento de Projetos'} icon={<WrenchScrewdriverIcon className="w-6 h-6"/>}>
                 <button 
                     onClick={addPlant}
                     className="w-full h-full flex items-center justify-center gap-2 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors text-cyan-400 font-semibold p-4"
                 >
                     <PlusIcon className="w-5 h-5"/>
-                    {t('config.createNewProject')}
+                    {'Criar Novo Projeto'}
                 </button>
             </DashboardCard>
         </div>
       </div>
 
       <div className="lg:col-span-1">
-        <PlantsMap coordinates={selectedPlant?.coordinates} t={t} />
+        <PlantsMap coordinates={selectedPlant?.coordinates} />
       </div>
 
       <div className="lg:col-span-3">
-        <ThermalPlantsSummary t={t} />
+        <ThermalPlantsSummary />
       </div>
 
     </div>

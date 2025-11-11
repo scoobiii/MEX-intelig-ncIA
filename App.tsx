@@ -1,31 +1,18 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import Header from './components/Header';
-import Navigation, { Page } from './components/Navigation';
+import Header from './application/Header';
+import Navigation, { Page } from './application/components/Navigation';
 import PowerPlant from './pages/PowerPlant';
 import Utilities from './pages/Utilities';
 import DataCenter from './pages/DataCenter';
 import Infrastructure from './pages/Infrastructure';
 import Financials from './pages/Financials';
 import Configuration from './pages/Configuration';
-import MexEcoBr from './pages/MexEcoBr';
-import ChillerDashboard from './pages/chiller';
-import PowerPlantSystem from './pages/PowerPlantSystem';
-import GasTurbineDiagram from './components/GasTurbineDiagram';
-import PowerPlantSankey from './components/PowerPlantSankey';
-import ExternalPageViewer from './pages/ExternalPageViewer';
-import HelpModal from './components/HelpModal'; // Import the new HelpModal component
-import MexInteligencia from './pages/MexInteligencia';
 import { PlantStatus, FuelMode, TurbineStatus, Plant } from './types';
 import { POWER_PLANTS as initialPowerPlants } from './data/plants';
-import { useTranslations } from './hooks/useTranslations';
-import { useSettings } from './hooks/useSettings';
 
 export type TurbineStatusConfig = { [key: number]: TurbineStatus };
 
 // --- Configuration Persistence with localStorage ---
-// This section handles saving and loading user preferences to ensure they persist across browser sessions.
-
-// Interface for a single plant's config
 export interface PlantConfig {
   fuelMode: FuelMode;
   flexMix: { h2: number; biodiesel: number };
@@ -33,7 +20,6 @@ export interface PlantConfig {
   turbineMaintenanceScores: { [key: number]: number };
 }
 
-// Interface for resource visibility config
 export interface ResourceConfig {
     water: boolean;
     gas: boolean;
@@ -42,18 +28,15 @@ export interface ResourceConfig {
     h2: boolean;
 }
 
-// Interface for all stored configs
 interface AllConfigs {
     [plantName: string]: PlantConfig;
 }
 
-// Storage Keys
-const CONFIG_STORAGE_KEY = 'app-all-configs'; // Stores all plant-specific settings
-const RESOURCE_CONFIG_KEY = 'app-resource-config'; // Stores resource visibility
-const SELECTED_PLANT_STORAGE_KEY = 'app-selected-plant'; // Stores the last selected plant
-const PLANTS_STORAGE_KEY = 'app-available-plants'; // Stores the list of plants, including user-added ones
+const CONFIG_STORAGE_KEY = 'app-all-configs';
+const RESOURCE_CONFIG_KEY = 'app-resource-config';
+const SELECTED_PLANT_STORAGE_KEY = 'app-selected-plant';
+const PLANTS_STORAGE_KEY = 'app-available-plants';
 
-// Default configuration for a new or unconfigured plant
 const defaultConfig: PlantConfig = {
   fuelMode: FuelMode.NaturalGas,
   flexMix: { h2: 20, biodiesel: 30 },
@@ -63,7 +46,6 @@ const defaultConfig: PlantConfig = {
   turbineMaintenanceScores: { 1: 10, 2: 15, 3: 85, 4: 20, 5: 5 },
 };
 
-// Default resource visibility settings
 const defaultResourceConfig: ResourceConfig = {
     water: true,
     gas: true,
@@ -72,24 +54,18 @@ const defaultResourceConfig: ResourceConfig = {
     h2: true,
 };
 
-// Loader function for all plant configurations
 const loadAllConfigs = (): AllConfigs => {
   try {
-    // Attempt to retrieve saved configurations from localStorage.
     const savedConfigString = localStorage.getItem(CONFIG_STORAGE_KEY);
     if (savedConfigString) {
-      // If data exists, parse it from JSON and return.
       return JSON.parse(savedConfigString);
     }
   } catch (error) {
-    // Log any errors during loading/parsing and fall back to a default state.
     console.error("Failed to load or parse configs from localStorage", error);
   }
-  // Return an empty object if no saved data is found or an error occurs.
   return {};
 };
 
-// Loader function for resource visibility
 const loadResourceConfig = (): ResourceConfig => {
     try {
         const savedConfigString = localStorage.getItem(RESOURCE_CONFIG_KEY);
@@ -102,7 +78,6 @@ const loadResourceConfig = (): ResourceConfig => {
     return defaultResourceConfig;
 };
 
-// Loader function for the list of available plants
 const loadAvailablePlants = (): Plant[] => {
     try {
         const savedPlantsString = localStorage.getItem(PLANTS_STORAGE_KEY);
@@ -116,19 +91,7 @@ const loadAvailablePlants = (): Plant[] => {
 };
 
 const App: React.FC = () => {
-  const [currentPage, _setCurrentPage] = useState<Page>('Power Plant');
-  const [previousPage, setPreviousPage] = useState<Page>('Power Plant');
-  const [externalPageUrl, setExternalPageUrl] = useState<string | null>(null);
-  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false); // State for help modal
-  const { language, setLanguage } = useSettings();
-  const { t } = useTranslations(language);
-
-  const setCurrentPage = (page: Page) => {
-    if (currentPage !== 'External Page') {
-      setPreviousPage(currentPage);
-    }
-    _setCurrentPage(page);
-  };
+  const [currentPage, setCurrentPage] = useState<Page>('Power Plant');
   
   // Shared state
   const [plantStatus, setPlantStatus] = useState<PlantStatus>(PlantStatus.Online);
@@ -136,22 +99,19 @@ const App: React.FC = () => {
   const [efficiency, setEfficiency] = useState(58.5);
   const [maxCapacity, setMaxCapacity] = useState(2500);
   const [efficiencyGain, setEfficiencyGain] = useState(0);
-  const [activeRackCount, setActiveRackCount] = useState(0); // State for active racks
+  const [activeRackCount, setActiveRackCount] = useState(0);
 
-  // --- Configuration State (Initialized from localStorage) ---
   const [allConfigs, setAllConfigs] = useState<AllConfigs>(loadAllConfigs);
   const [resourceConfig, setResourceConfigState] = useState<ResourceConfig>(loadResourceConfig);
   const [availablePlants, setAvailablePlants] = useState<Plant[]>(loadAvailablePlants);
   const [selectedPlantName, setSelectedPlantNameState] = useState<string>(() => {
     const savedPlant = localStorage.getItem(SELECTED_PLANT_STORAGE_KEY);
-    // Ensure the saved plant still exists in the list before selecting it.
     if (savedPlant && loadAvailablePlants().find(p => p.name === savedPlant)) {
         return savedPlant;
     }
     return loadAvailablePlants()[0]?.name || 'MAUAX Bio PowerPlant (standard)';
   });
 
-  // Derived state for the currently selected plant's configuration
   const currentConfig = useMemo(() => {
     return allConfigs[selectedPlantName] || defaultConfig;
   }, [allConfigs, selectedPlantName]);
@@ -160,10 +120,6 @@ const App: React.FC = () => {
     return availablePlants.find(p => p.name === selectedPlantName) || availablePlants[0];
   }, [availablePlants, selectedPlantName]);
 
-  // --- Automatic Persistence Effects ---
-  // These effects automatically save the relevant state to localStorage whenever it changes.
-  
-  // Persist all plant configurations (fuel mode, flex mix, turbine status, etc.)
   useEffect(() => {
     try {
         localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(allConfigs));
@@ -172,7 +128,6 @@ const App: React.FC = () => {
     }
   }, [allConfigs]);
 
-  // Persist the list of available plants (including user-added ones)
   useEffect(() => {
     try {
         localStorage.setItem(PLANTS_STORAGE_KEY, JSON.stringify(availablePlants));
@@ -181,12 +136,8 @@ const App: React.FC = () => {
     }
   }, [availablePlants]);
   
-  // --- State Setters with Persistence ---
-  // These functions update state and explicitly save to localStorage.
-  
   const setSelectedPlantName = (name: string) => {
     try {
-        // Save the newly selected plant name to localStorage immediately.
         localStorage.setItem(SELECTED_PLANT_STORAGE_KEY, name);
     } catch (error) {
         console.error("Failed to save selected plant to localStorage", error);
@@ -194,7 +145,6 @@ const App: React.FC = () => {
     setSelectedPlantNameState(name);
   };
 
-  // Generic updater for the current plant's configuration, which triggers the persistence effect.
   const updateCurrentConfig = (newConfig: Partial<PlantConfig>) => {
       setAllConfigs(prev => ({
           ...prev,
@@ -214,29 +164,6 @@ const App: React.FC = () => {
     setResourceConfigState(newConfig);
   };
   
-  // Effect to handle messages from the iframe in MexEcoBr
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (typeof event.data === 'object' && event.data !== null && 'type' in event.data) {
-        const { type, page, url } = event.data;
-
-        if (type === 'navigate' && typeof page === 'string') {
-          setCurrentPage(page as Page);
-        } else if (type === 'viewExternal' && typeof url === 'string') {
-          setExternalPageUrl(url);
-          setCurrentPage('External Page');
-        } else if (type === 'openExternal' && typeof url === 'string') {
-          // Fallback to opening in a new tab for non-embeddable sites.
-          window.open(url, '_blank', 'noopener,noreferrer');
-        }
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [currentPage]); // Re-add listener to capture `currentPage` correctly for `setPreviousPage`
-
-  // --- Configuration Setter Functions ---
   const setFuelMode = (fuelMode: FuelMode) => updateCurrentConfig({ fuelMode });
   
   const setFlexMix = (updater: React.SetStateAction<{ h2: number; biodiesel: number }>) => {
@@ -262,19 +189,18 @@ const App: React.FC = () => {
 
   const addPlant = () => {
     setAvailablePlants(prev => {
-      const newProjectName = `${t('config.newProjectName')} ${prev.filter(p => p.name.startsWith(t('config.newProjectName'))).length + 1}`;
+      const newProjectName = `Novo Projeto ${prev.filter(p => p.name.startsWith('Novo Projeto')).length + 1}`;
       const newPlant: Plant = {
         name: newProjectName,
-        nameKey: '', // User-created plants don't have a translation key
+        nameKey: '',
         power: 100,
         fuelKey: 'fuel.NATURAL_GAS',
-        identifier: { type: 'location', valueKey: 'plants.identifier.notDefined' },
-        descriptionKey: 'plants.mauaxBioPowerPlant.description', // Placeholder
-        statusKey: 'plant.status.proposal',
+        identifier: { type: 'location', valueKey: 'Não definido' },
+        descriptionKey: 'Descrição do novo projeto.',
+        statusKey: 'Proposta',
         type: 'new',
         coordinates: { lat: 0, lng: 0 },
       };
-      // Automatically select the new plant
       setSelectedPlantName(newPlant.name);
       return [...prev, newPlant];
     });
@@ -283,7 +209,6 @@ const App: React.FC = () => {
   const updatePlant = (plantNameToUpdate: string, updatedPlant: Plant) => {
     setAvailablePlants(prev => prev.map(p => p.name === plantNameToUpdate ? updatedPlant : p));
   };
-
 
   useEffect(() => {
     const plant = availablePlants.find(p => p.name === selectedPlantName);
@@ -297,22 +222,31 @@ const App: React.FC = () => {
         setPowerOutput(0);
       }
 
-      // If no configuration exists for the selected plant, create a default one.
       if (!allConfigs[selectedPlantName]) {
         let newFuelMode = FuelMode.NaturalGas;
+        const plantFuelKey = plant.fuelKey || '';
         if (plant.name === 'MAUAX Bio PowerPlant (standard)') {
+            newFuelMode = FuelMode.FlexNGH2;
+        } else if (plantFuelKey.includes('FLEX_NG_H2')) {
           newFuelMode = FuelMode.FlexNGH2;
-        } else if (plant.fuelKey.includes('ETHANOL')) {
+        } else if (plantFuelKey.includes('FLEX_ETHANOL_BIODIESEL')) {
+            newFuelMode = FuelMode.FlexEthanolBiodiesel;
+        } else if (plantFuelKey.includes('ETHANOL')) {
           newFuelMode = FuelMode.Ethanol;
-        } else if (plant.fuelKey.includes('BIODIESEL')) {
+        } else if (plantFuelKey.includes('BIODIESEL')) {
           newFuelMode = FuelMode.Biodiesel;
-        } else if (plant.fuelKey.includes('NUCLEAR')) {
+        } else if (plantFuelKey.includes('NUCLEAR')) {
           newFuelMode = FuelMode.Nuclear;
+        } else if (plantFuelKey.includes('SOLAR_BESS')) {
+          newFuelMode = FuelMode.SolarBess;
+        } else if (plantFuelKey.includes('WIND_BESS')) {
+            newFuelMode = FuelMode.WindBess;
+        } else if (plantFuelKey.includes('NATURAL_GAS')) {
+            newFuelMode = FuelMode.NaturalGas;
         }
         updateCurrentConfig({ fuelMode: newFuelMode });
       }
     } else if (availablePlants.length > 0) {
-        // If selected plant doesn't exist (e.g., deleted), select the first one
         setSelectedPlantName(availablePlants[0].name);
     }
   }, [selectedPlantName, plantStatus, availablePlants]);
@@ -339,12 +273,10 @@ const App: React.FC = () => {
     if ((isTrigenerationProject || selectedPlant.fuelKey === 'fuel.NUCLEAR') && wasteHeat > 0) {
         const chillerCOP = 0.694;
         const coolingProduction = wasteHeat * chillerCOP;
-
         const coolingDistribution = { tiac: 40, fog: 25, dataCenter: 35 };
         const tiacCooling = coolingProduction * (coolingDistribution.tiac / 100);
         const fogCooling = coolingProduction * (coolingDistribution.fog / 100);
         const dataCenterCooling = coolingProduction * (coolingDistribution.dataCenter / 100);
-
         const ambientTemp = 28.5;
         const ISO_TEMP_THRESHOLD = 25;
         if (ambientTemp > ISO_TEMP_THRESHOLD) {
@@ -375,13 +307,8 @@ const App: React.FC = () => {
           turbineMaintenanceScores={currentConfig.turbineMaintenanceScores || {}}
           setTurbineMaintenanceScores={setTurbineMaintenanceScores}
           resourceConfig={resourceConfig}
-          t={t}
         />;
       case 'Utilities':
-      case 'Fluxo de Energia da Usina':
-      case 'Chiller Absorção -> Tiac':
-      case 'Chiller Absorção -> Fog':
-      case 'Chiller Absorção -> Data Cloud':
         return <Utilities 
           plantStatus={plantStatus}
           powerOutput={powerOutput}
@@ -389,16 +316,11 @@ const App: React.FC = () => {
           setCurrentPage={setCurrentPage}
           activeRackCount={activeRackCount}
           selectedPlant={selectedPlant}
-          t={t}
         />;
       case 'Data Center':
-        return <DataCenter onActiveRackUpdate={setActiveRackCount} t={t} />;
+        return <DataCenter onActiveRackUpdate={setActiveRackCount} />;
       case 'Infrastructure':
         return <Infrastructure />;
-      case 'MAUAX consortium':
-        return <MexEcoBr />;
-      case 'Pitch MEX':
-        return <MexInteligencia t={t} />;
       case 'Financials':
         return <Financials 
           plantStatus={plantStatus}
@@ -406,7 +328,6 @@ const App: React.FC = () => {
           fuelMode={currentConfig.fuelMode}
           flexMix={currentConfig.flexMix}
           activeRackCount={activeRackCount}
-          t={t}
         />;
       case 'Configuration':
         return <Configuration
@@ -427,32 +348,7 @@ const App: React.FC = () => {
           updatePlant={updatePlant}
           resourceConfig={resourceConfig}
           setResourceConfig={setResourceConfig}
-          t={t}
         />;
-      case 'Chiller':
-      case 'Chiller Absorção':
-        return <ChillerDashboard t={t} />;
-      case 'inventario UTE':
-      case 'PowerPlantSystem':
-        return <PowerPlantSystem t={t} />;
-      case 'Fog System Details':
-        return <GasTurbineDiagram t={t} />;
-      case 'Power Plant Sankey':
-        return <PowerPlantSankey 
-            powerOutput={powerOutput}
-            efficiency={efficiency}
-            setCurrentPage={setCurrentPage}
-            t={t}
-        />;
-      case 'External Page':
-        return externalPageUrl ? (
-          <ExternalPageViewer url={externalPageUrl} onClose={() => setCurrentPage(previousPage)} t={t} />
-        ) : (
-          <div className="text-center mt-8">
-            <p>{t('external.noUrl')}</p>
-            <button onClick={() => setCurrentPage(previousPage)} className="mt-4 px-4 py-2 bg-cyan-500 text-white rounded-lg">{t('external.back')}</button>
-          </div>
-        );
       default:
         return <PowerPlant 
           plantStatus={plantStatus}
@@ -466,32 +362,22 @@ const App: React.FC = () => {
           turbineMaintenanceScores={currentConfig.turbineMaintenanceScores || {}}
           setTurbineMaintenanceScores={setTurbineMaintenanceScores}
           resourceConfig={resourceConfig}
-          t={t}
         />;
     }
   };
 
   return (
     <div className="bg-gray-900 min-h-screen text-gray-200">
-      <Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} t={t} />
+      <Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
       <div className="p-4 sm:p-6 lg:p-8 max-w-full mx-auto">
         <Header 
           plantStatus={plantStatus} 
           powerOutput={powerOutput} 
-          selectedPlantName={t(selectedPlant.nameKey) || selectedPlant.name}
+          selectedPlantName={selectedPlant.name}
           maxCapacity={maxCapacity}
-          language={language}
-          setLanguage={setLanguage}
-          onHelpClick={() => setIsHelpModalOpen(true)} // Pass handler to open modal
-          t={t}
         />
         {renderPage()}
       </div>
-      <HelpModal 
-        isOpen={isHelpModalOpen} 
-        onClose={() => setIsHelpModalOpen(false)} 
-        t={t} 
-      />
     </div>
   );
 };

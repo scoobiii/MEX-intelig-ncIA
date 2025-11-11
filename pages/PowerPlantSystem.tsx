@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, ScatterChart, Scatter } from 'recharts';
-import { BoltIcon as Power, FactoryIcon as Factory, CogIcon as Settings, InfoIcon as Info, ChevronDownIcon as ChevronDown, ChevronUpIcon as ChevronUp, ChartBarIcon as BarChart3, TrendingUpIcon as TrendingUp, MagnifyingGlassIcon as Search, CloseIcon } from '../components/icons';
+import { BoltIcon as Power, FactoryIcon as Factory, CogIcon as Settings, InfoIcon as Info, ChevronDownIcon as ChevronDown, ChevronUpIcon as ChevronUp, ChartBarIcon as BarChart3, TrendingUpIcon as TrendingUp, MagnifyingGlassIcon as Search, CloseIcon } from '../application/components/icons';
 import { POWER_PLANTS } from '../data/plants';
 import { Plant } from '../types';
 
 interface PowerPlantSystemProps {
-  t: (key: string) => string;
 }
 
 const Metric = ({ label, value, unit, icon: Icon, colorClass = "text-blue-600" }) => (
@@ -20,7 +19,7 @@ const Metric = ({ label, value, unit, icon: Icon, colorClass = "text-blue-600" }
   </div>
 );
 
-const PowerPlantSystem: React.FC<PowerPlantSystemProps> = ({ t }) => {
+const PowerPlantSystem: React.FC<PowerPlantSystemProps> = () => {
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPlant, setSelectedPlant] = useState('all');
@@ -31,7 +30,6 @@ const PowerPlantSystem: React.FC<PowerPlantSystemProps> = ({ t }) => {
     efficiency: true
   });
 
-  // FIX: Use `cycleKey` instead of `cycle`.
   const plantsData = POWER_PLANTS.filter(p => p.cycleKey);
 
   const toggleSection = (section: keyof typeof expandedSections) => {
@@ -42,14 +40,12 @@ const PowerPlantSystem: React.FC<PowerPlantSystemProps> = ({ t }) => {
   };
 
   const filteredPlants = plantsData.filter(plant => {
-    // FIX: Use `fuelKey` with translation `t()` for filtering instead of `fuel`.
     const matchesFilter = selectedFilter === 'all' || 
-                         (plant.fuelKey && t(plant.fuelKey).toLowerCase().includes(selectedFilter.toLowerCase()));
+                         (plant.fuelKey && plant.fuelKey.toLowerCase().includes(selectedFilter.toLowerCase()));
     
-    // FIX: Use `locationKey` with translation `t()` for searching instead of `location`.
     const matchesSearch = searchTerm === '' ||
                          plant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (plant.locationKey && t(plant.locationKey).toLowerCase().includes(searchTerm.toLowerCase()));
+                         (plant.locationKey && plant.locationKey.toLowerCase().includes(searchTerm.toLowerCase()));
 
     return matchesFilter && matchesSearch;
   });
@@ -57,10 +53,9 @@ const PowerPlantSystem: React.FC<PowerPlantSystemProps> = ({ t }) => {
   const highlightedPlant = selectedPlant === 'all' ? null : plantsData.find(p => p.name === selectedPlant);
 
   const fuelTypeData = [
-    // FIX: Use `t(p.fuelKey)` for comparison instead of `p.fuel`.
-    { name: 'Gás Natural', count: plantsData.filter(p => t(p.fuelKey) === 'Gás Natural').length, generation: plantsData.filter(p => t(p.fuelKey) === 'Gás Natural').reduce((sum, p) => sum + (p.generation2023 || 0), 0) },
-    { name: 'Carvão Mineral', count: plantsData.filter(p => t(p.fuelKey) === 'Carvão Mineral').length, generation: plantsData.filter(p => t(p.fuelKey) === 'Carvão Mineral').reduce((sum, p) => sum + (p.generation2023 || 0), 0) },
-    { name: 'Óleo Combustível', count: plantsData.filter(p => t(p.fuelKey) === 'Óleo Combustível').length, generation: plantsData.filter(p => t(p.fuelKey) === 'Óleo Combustível').reduce((sum, p) => sum + (p.generation2023 || 0), 0) }
+    { name: 'Gás Natural', count: plantsData.filter(p => p.fuelKey.includes('NATURAL_GAS')).length, generation: plantsData.filter(p => p.fuelKey.includes('NATURAL_GAS')).reduce((sum, p) => sum + (p.generation2023 || 0), 0) },
+    { name: 'Carvão Mineral', count: plantsData.filter(p => p.fuelKey.includes('COAL')).length, generation: plantsData.filter(p => p.fuelKey.includes('COAL')).reduce((sum, p) => sum + (p.generation2023 || 0), 0) },
+    { name: 'Óleo Combustível', count: plantsData.filter(p => p.fuelKey.includes('OIL')).length, generation: plantsData.filter(p => p.fuelKey.includes('OIL')).reduce((sum, p) => sum + (p.generation2023 || 0), 0) }
   ];
 
   const topEmitters = plantsData
@@ -74,8 +69,7 @@ const PowerPlantSystem: React.FC<PowerPlantSystemProps> = ({ t }) => {
       name: p.name,
       efficiency: p.efficiency,
       rate: p.rate,
-      // FIX: Use `fuelKey` with translation `t()` instead of `fuel`.
-      fuel: t(p.fuelKey)
+      fuel: p.fuelKey
     }));
 
   const COLORS = ['#3B82F6', '#EF4444', '#F59E0B', '#10B981', '#8B5CF6'];
@@ -101,21 +95,17 @@ const PowerPlantSystem: React.FC<PowerPlantSystemProps> = ({ t }) => {
   );
 
   const getFuelColor = (fuel: string) => {
-    switch(fuel) {
-      case 'Gás Natural': return 'text-blue-600';
-      case 'Carvão Mineral': return 'text-red-600';
-      case 'Óleo Combustível': return 'text-orange-600';
-      default: return 'text-gray-600';
-    }
+    if (fuel.includes('NATURAL_GAS')) return 'text-blue-600';
+    if (fuel.includes('COAL')) return 'text-red-600';
+    if (fuel.includes('OIL')) return 'text-orange-600';
+    return 'text-gray-600';
   };
 
   const getFuelBgColor = (fuel: string) => {
-    switch(fuel) {
-      case 'Gás Natural': return 'bg-blue-50 border-blue-200';
-      case 'Carvão Mineral': return 'bg-red-50 border-red-200';
-      case 'Óleo Combustível': return 'bg-orange-50 border-orange-200';
-      default: return 'bg-gray-50 border-gray-200';
-    }
+    if (fuel.includes('NATURAL_GAS')) return 'bg-blue-50 border-blue-200';
+    if (fuel.includes('COAL')) return 'bg-red-50 border-red-200';
+    if (fuel.includes('OIL')) return 'bg-orange-50 border-orange-200';
+    return 'bg-gray-50 border-gray-200';
   };
 
   return (
@@ -133,21 +123,21 @@ const PowerPlantSystem: React.FC<PowerPlantSystemProps> = ({ t }) => {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-3 mb-4">
             <Factory className="w-10 h-10 text-blue-600" />
-            <h1 className="text-4xl font-bold text-gray-800">{t('system.title')}</h1>
+            <h1 className="text-4xl font-bold text-gray-800">Inventário Nacional de Usinas Termelétricas</h1>
           </div>
-          <p className="text-gray-600 text-lg">{t('system.subtitle')}</p>
+          <p className="text-gray-600 text-lg">Análise de Performance, Emissões e Eficiência (Ano Base 2023)</p>
         </div>
 
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label htmlFor="search-plant" className="block text-sm font-medium text-gray-700 mb-1">{t('system.search')}</label>
+              <label htmlFor="search-plant" className="block text-sm font-medium text-gray-700 mb-1">Buscar Usina</label>
               <div className="relative">
                 <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <input
                   id="search-plant"
                   type="text"
-                  placeholder={t('system.searchPlaceholder')}
+                  placeholder="Nome ou localização..."
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -156,29 +146,29 @@ const PowerPlantSystem: React.FC<PowerPlantSystemProps> = ({ t }) => {
             </div>
 
             <div>
-              <label htmlFor="fuel-filter" className="block text-sm font-medium text-gray-700 mb-1">{t('system.filterFuel')}</label>
+              <label htmlFor="fuel-filter" className="block text-sm font-medium text-gray-700 mb-1">Filtrar por Combustível</label>
               <select
                 id="fuel-filter"
                 value={selectedFilter}
                 onChange={(e) => setSelectedFilter(e.target.value)}
                 className="w-full py-2 px-3 border border-gray-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="all">{t('system.allFuels')}</option>
-                <option value="Gás Natural">Gás Natural</option>
-                <option value="Carvão Mineral">Carvão Mineral</option>
-                <option value="Óleo Combustível">Óleo Combustível</option>
+                <option value="all">Todos os Combustíveis</option>
+                <option value="NATURAL_GAS">Gás Natural</option>
+                <option value="COAL">Carvão Mineral</option>
+                <option value="OIL">Óleo Combustível</option>
               </select>
             </div>
 
             <div>
-              <label htmlFor="locate-plant" className="block text-sm font-medium text-gray-700 mb-1">{t('system.highlightPlant')}</label>
+              <label htmlFor="locate-plant" className="block text-sm font-medium text-gray-700 mb-1">Destacar Usina no Mapa</label>
               <select
                 id="locate-plant"
                 value={selectedPlant}
                 onChange={(e) => setSelectedPlant(e.target.value)}
                 className="w-full py-2 px-3 border border-gray-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="all">{t('system.noHighlight')}</option>
+                <option value="all">Sem destaque</option>
                 {plantsData.sort((a, b) => a.name.localeCompare(b.name)).map(plant => (
                   <option key={plant.name} value={plant.name}>
                     {plant.name}
@@ -196,55 +186,52 @@ const PowerPlantSystem: React.FC<PowerPlantSystemProps> = ({ t }) => {
                 <div className="flex items-center space-x-3">
                   <Info className="w-8 h-8 text-blue-600" />
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-800">{t('system.highlight')} {highlightedPlant.name}</h2>
-                    {/* FIX: Use `locationKey` with `t()` */}
-                    <p className="text-gray-500">{t(highlightedPlant.locationKey)}</p>
+                    <h2 className="text-2xl font-bold text-gray-800">Destaque: {highlightedPlant.name}</h2>
+                    <p className="text-gray-500">{highlightedPlant.locationKey}</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setSelectedPlant('all')}
                   className="p-2 rounded-full text-gray-500 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  aria-label={t('system.closeHighlight')}
+                  aria-label="Fechar destaque"
                 >
                   <CloseIcon className="w-6 h-6" />
                 </button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h4 className="font-semibold text-lg text-gray-800 mb-3">{t('system.overviewDescription')}</h4>
+                  <h4 className="font-semibold text-lg text-gray-800 mb-3">Visão Geral</h4>
                   <div className="space-y-2 text-sm text-gray-700">
-                    {/* FIX: Use `fuelKey` and `cycleKey` with `t()` */}
-                    <p><strong>{t('config.fuelMode')}</strong> {t(highlightedPlant.fuelKey)}</p>
-                    <p><strong>{t('system.technology')}</strong> {t(highlightedPlant.cycleKey)}</p>
-                    {/* FIX: Use `descriptionKey` with `t()` */}
+                    <p><strong>Combustível:</strong> {highlightedPlant.fuelKey}</p>
+                    <p><strong>Tecnologia:</strong> {highlightedPlant.cycleKey}</p>
                     {highlightedPlant.descriptionKey && (
-                      <p className="pt-2 italic border-t border-gray-200 mt-2">{t(highlightedPlant.descriptionKey)}</p>
+                      <p className="pt-2 italic border-t border-gray-200 mt-2">{highlightedPlant.descriptionKey}</p>
                     )}
                   </div>
                 </div>
                 <div className="space-y-4">
-                  <h4 className="font-semibold text-lg text-gray-800 mb-3">{t('system.keyIndicators')}</h4>
+                  <h4 className="font-semibold text-lg text-gray-800 mb-3">Indicadores Chave</h4>
                   
                   <div>
-                    <h5 className="font-medium text-gray-500 text-sm uppercase tracking-wider mb-2">{t('system.section.production_capacity')}</h5>
+                    <h5 className="font-medium text-gray-500 text-sm uppercase tracking-wider mb-2">Capacidade e Produção</h5>
                     <div className="space-y-2">
-                        <Metric label={t('system.capacity')} value={highlightedPlant.power} unit="MW" icon={Power} colorClass="text-blue-600" />
-                        <Metric label={t('system.generation')} value={highlightedPlant.generation2023} unit="GWh" icon={TrendingUp} colorClass="text-green-600" />
+                        <Metric label="Potência" value={highlightedPlant.power} unit="MW" icon={Power} colorClass="text-blue-600" />
+                        <Metric label="Geração" value={highlightedPlant.generation2023} unit="GWh" icon={TrendingUp} colorClass="text-green-600" />
                     </div>
                   </div>
 
                   <div>
-                    <h5 className="font-medium text-gray-500 text-sm uppercase tracking-wider mb-2">{t('system.section.emissions_data')}</h5>
+                    <h5 className="font-medium text-gray-500 text-sm uppercase tracking-wider mb-2">Dados de Emissão</h5>
                      <div className="space-y-2">
-                        <Metric label={t('system.emissions')} value={highlightedPlant.emissions2023} unit="mil tCO₂e" icon={Factory} colorClass="text-red-600" />
+                        <Metric label="Emissões" value={highlightedPlant.emissions2023} unit="mil tCO₂e" icon={Factory} colorClass="text-red-600" />
                     </div>
                   </div>
 
                    <div>
-                    <h5 className="font-medium text-gray-500 text-sm uppercase tracking-wider mb-2">{t('system.section.efficiency_performance')}</h5>
+                    <h5 className="font-medium text-gray-500 text-sm uppercase tracking-wider mb-2">Performance de Eficiência</h5>
                      <div className="space-y-2">
-                        <Metric label={t('powerOutput.totalEfficiency')} value={highlightedPlant.efficiency} unit="%" icon={Settings} colorClass="text-purple-600" />
-                        <Metric label={t('system.efficiencyAnalysis')} value={highlightedPlant.rate} unit="tCO₂e/GWh" icon={BarChart3} colorClass="text-orange-600" />
+                        <Metric label="Eficiência Total" value={highlightedPlant.efficiency} unit="%" icon={Settings} colorClass="text-purple-600" />
+                        <Metric label="Taxa de Emissão" value={highlightedPlant.rate} unit="tCO₂e/GWh" icon={BarChart3} colorClass="text-orange-600" />
                     </div>
                   </div>
                 </div>
@@ -257,27 +244,27 @@ const PowerPlantSystem: React.FC<PowerPlantSystemProps> = ({ t }) => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div>
             <SectionCard
-              title={t('system.fuelDistribution')}
+              title="Distribuição por Combustível"
               icon={BarChart3}
               isExpanded={expandedSections.analytics}
               onToggle={() => toggleSection('analytics')}
             >
               <div className="space-y-6 mt-4">
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-gray-800 mb-3">{t('system.plantCountByFuel')}</h4>
+                  <h4 className="font-semibold text-gray-800 mb-3">Contagem de Usinas por Combustível</h4>
                   <ResponsiveContainer width="100%" height={250}>
                     <BarChart data={fuelTypeData}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" />
                       <YAxis />
                       <Tooltip />
-                      <Bar dataKey="count" fill="#3B82F6" name={t('system.quantity')} />
+                      <Bar dataKey="count" fill="#3B82F6" name="Quantidade" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
 
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-gray-800 mb-3">{t('system.generationByFuel')}</h4>
+                  <h4 className="font-semibold text-gray-800 mb-3">Geração por Combustível (GWh)</h4>
                   <ResponsiveContainer width="100%" height={200}>
                     <PieChart>
                       <Pie
@@ -302,7 +289,7 @@ const PowerPlantSystem: React.FC<PowerPlantSystemProps> = ({ t }) => {
             </SectionCard>
 
             <SectionCard
-              title={t('system.topEmitters')}
+              title="Top 10 Emissores de GEE (2023)"
               icon={TrendingUp}
               isExpanded={expandedSections.emissions}
               onToggle={() => toggleSection('emissions')}
@@ -316,7 +303,7 @@ const PowerPlantSystem: React.FC<PowerPlantSystemProps> = ({ t }) => {
                       <YAxis dataKey="name" type="category" width={100} fontSize={10} interval={0}/>
                       <Tooltip formatter={(value: number) => `${value.toLocaleString()} mil tCO₂e`} />
                       <Legend />
-                      <Bar dataKey="emissions2023" name={t('system.emissionsUnit')} fill="#EF4444" />
+                      <Bar dataKey="emissions2023" name="Emissões (k tCO₂e)" fill="#EF4444" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -326,14 +313,14 @@ const PowerPlantSystem: React.FC<PowerPlantSystemProps> = ({ t }) => {
 
           <div>
             <SectionCard
-              title={t('system.efficiencyAnalysis')}
+              title="Análise de Eficiência"
               icon={Settings}
               isExpanded={expandedSections.efficiency}
               onToggle={() => toggleSection('efficiency')}
             >
               <div className="space-y-6 mt-4">
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-gray-800 mb-3">{t('system.efficiencyRelation')}</h4>
+                  <h4 className="font-semibold text-gray-800 mb-3">Relação Eficiência vs. Taxa de Emissão</h4>
                   <ResponsiveContainer width="100%" height={300}>
                     <ScatterChart>
                       <CartesianGrid strokeDasharray="3 3" />
@@ -349,7 +336,6 @@ const PowerPlantSystem: React.FC<PowerPlantSystemProps> = ({ t }) => {
                                         <p className="font-bold">{data.name}</p>
                                         <p>Eficiência: {data.efficiency}%</p>
                                         <p>Taxa Emissão: {data.rate} tCO₂e/GWh</p>
-                                        {/* FIX: Use `fuel` property which now holds translated value. */}
                                         <p>Combustível: {data.fuel}</p>
                                     </div>
                                 );
@@ -365,26 +351,24 @@ const PowerPlantSystem: React.FC<PowerPlantSystemProps> = ({ t }) => {
             </SectionCard>
 
             <SectionCard
-              title={t('system.plantListTitle').replace('{count}', String(filteredPlants.length))}
+              title={`Lista de Usinas (${filteredPlants.length})`}
               icon={Factory}
               isExpanded={expandedSections.plants}
               onToggle={() => toggleSection('plants')}
             >
               <div className="space-y-3 mt-4 max-h-[500px] overflow-y-auto pr-2">
                 {filteredPlants.length > 0 ? filteredPlants.map((plant, index) => (
-                  <div key={index} className={`p-4 rounded-lg border ${getFuelBgColor(t(plant.fuelKey))}`}>
+                  <div key={index} className={`p-4 rounded-lg border ${getFuelBgColor(plant.fuelKey)}`}>
                     <div className="flex justify-between items-start mb-2">
                       <h4 className="font-semibold text-gray-800">{plant.name}</h4>
-                      <span className={`text-sm font-medium ${getFuelColor(t(plant.fuelKey))}`}>
-                        {/* FIX: Use `fuelKey` with `t()` */}
-                        {t(plant.fuelKey)}
+                      <span className={`text-sm font-medium ${getFuelColor(plant.fuelKey)}`}>
+                        {plant.fuelKey}
                       </span>
                     </div>
                     <div className="text-sm text-gray-600 space-y-1">
-                      {/* FIX: Use `locationKey` and `cycleKey` with `t()` */}
-                      <p><span className="font-medium">{t('system.location')}</span> {t(plant.locationKey)}</p>
-                      <p><span className="font-medium">{t('system.technology')}</span> {t(plant.cycleKey)}</p>
-                      <p><span className="font-medium">{t('system.capacity')}</span> {plant.power} MW</p>
+                      <p><span className="font-medium">Localização:</span> {plant.locationKey}</p>
+                      <p><span className="font-medium">Tecnologia:</span> {plant.cycleKey}</p>
+                      <p><span className="font-medium">Potência:</span> {plant.power} MW</p>
                     </div>
                     <div className="grid grid-cols-2 gap-4 mt-3 text-xs">
                       <div className="bg-white p-2 rounded">
@@ -398,7 +382,7 @@ const PowerPlantSystem: React.FC<PowerPlantSystemProps> = ({ t }) => {
                     </div>
                   </div>
                 )) : (
-                  <p className="text-center text-gray-500 py-8">{t('system.noPlantsFound')}</p>
+                  <p className="text-center text-gray-500 py-8">Nenhuma usina encontrada com os filtros atuais.</p>
                 )}
               </div>
             </SectionCard>
@@ -406,23 +390,23 @@ const PowerPlantSystem: React.FC<PowerPlantSystemProps> = ({ t }) => {
         </div>
 
         <div className="mt-8 bg-white rounded-lg shadow-lg p-6">
-          <h3 className="text-xl font-bold text-gray-800 mb-4">{t('system.summaryTitle')}</h3>
+          <h3 className="text-xl font-bold text-gray-800 mb-4">Resumo do Inventário</h4>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="text-center">
               <div className="text-3xl font-bold text-blue-600">{plantsData.length}</div>
-              <div className="text-gray-600">{t('system.inventoriedPlants')}</div>
+              <div className="text-gray-600">Usinas Inventariadas</div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-green-600">26,9</div>
-              <div className="text-gray-600">{t('system.generatedTWh')}</div>
+              <div className="text-gray-600">TWh Gerados</div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-red-600">17,9</div>
-              <div className="text-gray-600">{t('system.emittedMtCO2e')}</div>
+              <div className="text-gray-600">MtCO₂e Emitidos</div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-orange-600">671</div>
-              <div className="text-gray-600">{t('system.avgEmissionRate')}</div>
+              <div className="text-gray-600">Taxa Média de Emissão (tCO₂e/GWh)</div>
             </div>
           </div>
         </div>
@@ -431,7 +415,7 @@ const PowerPlantSystem: React.FC<PowerPlantSystemProps> = ({ t }) => {
           <div className="flex items-start space-x-3">
             <Info className="w-6 h-6 text-blue-600 mt-1 flex-shrink-0" />
             <div>
-              <h3 className="font-semibold text-gray-800 mb-2">{t('system.aboutInventory')}</h3>
+              <h3 className="font-semibold text-gray-800 mb-2">Sobre o Inventário</h3>
               <p className="text-gray-600 text-sm leading-relaxed">
                 Este sistema apresenta dados do 4º Inventário de Emissões Atmosféricas em Usinas Termelétricas (ano-base 2023) 
                 realizado pelo Instituto de Energia e Meio Ambiente (IEMA). O inventário abrange 67 usinas termelétricas a 

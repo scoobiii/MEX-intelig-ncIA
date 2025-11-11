@@ -1,4 +1,3 @@
-
 export enum PlantStatus {
   Online = 'ONLINE',
   Offline = 'OFFLINE',
@@ -12,6 +11,8 @@ export enum FuelMode {
   FlexNGH2 = 'FLEX_NG_H2',
   FlexEthanolBiodiesel = 'FLEX_ETHANOL_BIODIESEL',
   Nuclear = 'NUCLEAR',
+  SolarBess = 'SOLAR_BESS',
+  WindBess = 'WIND_BESS',
 }
 
 export interface HistoricalDataPoint {
@@ -35,16 +36,22 @@ export type TurbineStatus = 'active' | 'inactive' | 'error';
 export interface Turbine {
   id: number;
   status: TurbineStatus;
-  rpm: number;
-  temp: number;
-  pressure: number;
-  type: 'Ciclo Rankine' | 'Ciclo Combinado';
   manufacturer: string;
   model: string;
   isoCapacity: number; // in MW
-  history?: { time: string; rpm: number; temp: number; pressure: number }[];
-  maintenanceScore: number; // Replaces needsMaintenance
+  maintenanceScore: number;
+  type: 'Ciclo Rankine' | 'Ciclo Combinado' | 'Eólica';
+  // Thermal specific
+  rpm?: number;
+  temp?: number;
+  pressure?: number;
+  // Wind specific
+  bladeRPM?: number;
+  windSpeed?: number;
+  powerOutput?: number; // current power output for a single turbine
+  history?: any[]; // Keep it generic for now to support both
 }
+
 
 export interface Alert {
   id: number;

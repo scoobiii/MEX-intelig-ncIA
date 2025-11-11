@@ -792,7 +792,7 @@ const MexEcoBr: React.FC = () => {
 
         const previousSlide = () => {
             if (currentSlide > 0) {
-                showSlide(currentSlide + 1);
+                showSlide(currentSlide - 1);
             }
         };
 
