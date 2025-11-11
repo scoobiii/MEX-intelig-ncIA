@@ -1,126 +1,113 @@
+
 import React from 'react';
 import DashboardCard from '../DashboardCard';
-import { ChartBarIcon, TrendingUpIcon } from '../application/components/icons';
+import { ChartBarIcon, TrendingUpIcon, BoltIcon, CogIcon, ComputerDesktopIcon } from '../application/components/icons';
 
-const PhaseCard: React.FC<{ phase: string; title: string; duration: string; objective: string; children: React.ReactNode; }> = ({ phase, title, duration, objective, children }) => (
-    <div className="bg-gray-900/50 p-6 rounded-lg border border-gray-700">
-        <div className="flex items-baseline gap-4 mb-3">
-            <span className="text-xl font-bold text-cyan-500">{phase}</span>
-            <h3 className="text-2xl font-bold text-white">{title}</h3>
-        </div>
-        <p className="text-sm text-gray-400 mb-2"><strong>Duração Estimada:</strong> {duration}</p>
-        <p className="text-sm text-gray-300 mb-4"><strong>Objetivo:</strong> {objective}</p>
-        <div className="border-t border-gray-600 pt-4">
-            {children}
-        </div>
+const FeatureList: React.FC<{ title: string; features: string[]; }> = ({ title, features }) => (
+    <div className="mb-4">
+        <h4 className="font-semibold text-cyan-400 mb-2">{title}</h4>
+        <ul className="list-disc list-inside space-y-1 text-sm text-gray-300">
+            {features.map((feature, index) => <li key={index}>{feature}</li>)}
+        </ul>
     </div>
 );
 
-const DeliverableList: React.FC<{ items: { title: string; description: string; }[] }> = ({ items }) => (
-    <div>
-        <h4 className="font-semibold text-cyan-400 mb-2">Entregas Chave:</h4>
-        <ul className="space-y-2 text-sm text-gray-300">
-            {items.map((item, index) => (
-                <li key={index} className="flex">
-                    <span className="text-cyan-400 mr-2">&#10148;</span>
-                    <span><strong>{item.title}:</strong> {item.description}</span>
-                </li>
-            ))}
-        </ul>
+const SprintCard: React.FC<{ sprint: string; title: string; description: string; }> = ({ sprint, title, description }) => (
+    <div className="bg-gray-700/50 p-4 rounded-lg">
+        <p className="text-sm font-bold text-cyan-400">{sprint}</p>
+        <h4 className="font-semibold text-white mt-1">{title}</h4>
+        <p className="text-sm text-gray-300 mt-2">{description}</p>
     </div>
 );
 
 const ProjectStatus: React.FC = () => {
     return (
-        <div className="mt-6">
-            <DashboardCard title="Plano de Trabalho e Entregas: Inovação em Energia" icon={<ChartBarIcon className="w-6 h-6" />}>
-                <div className="p-4 space-y-8">
-                    <p className="text-center text-gray-400">
-                        Síntese de um plano de trabalho para um projeto genérico de inovação no setor de energia, estruturado a partir da análise dos desafios de grandes players do mercado.
-                    </p>
-                    
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        {/* FASE 1 */}
-                        <PhaseCard 
-                            phase="Fase 1" 
-                            title="Concepção e Alinhamento Estratégico" 
-                            duration="2 Semanas" 
-                            objective="Definir o escopo, a proposta de valor e o alinhamento regulatório da solução."
-                        >
-                            <DeliverableList items={[
-                                { title: "Análise de Mercado e Requisitos", description: "Incluindo LGPD e padrões do setor elétrico." },
-                                { title: "Lean Canvas / Proposta de Valor", description: "Definição clara do modelo de negócio." },
-                                { title: "Desenho da Arquitetura de Dados", description: "Fontes, fluxos, segurança e consentimento." }
-                            ]} />
-                        </PhaseCard>
+        <div className="mt-6 space-y-6">
+            <header className="text-center">
+                <h2 className="text-3xl font-bold text-white">Status do Projeto e Roadmap</h2>
+                <p className="text-gray-400 mt-1">Visão geral das funcionalidades atuais e planejamento de futuras entregas.</p>
+            </header>
 
-                        {/* FASE 2 */}
-                        <PhaseCard 
-                            phase="Fase 2" 
-                            title="Desenvolvimento e Prova de Conceito (PoC)" 
-                            duration="4 Semanas" 
-                            objective="Construir o protótipo funcional e validar a viabilidade técnica da solução."
-                        >
-                            <DeliverableList items={[
-                                { title: "Protótipo Funcional (MVP)", description: "Código-fonte da solução mínima viável." },
-                                { title: "Relatório de Teste de Integração", description: "Demonstração da capacidade de processar dados." },
-                                { title: "Relatório de Prova de Conceito (PoC)", description: "Métricas de viabilidade técnica." }
-                            ]} />
-                        </PhaseCard>
-
-                        {/* FASE 3 */}
-                        <PhaseCard 
-                            phase="Fase 3" 
-                            title="Validação e Teste em Ambiente Real (Piloto)" 
-                            duration="3 Semanas" 
-                            objective="Testar a solução em ambiente operacional, coletando métricas de desempenho."
-                        >
-                            <DeliverableList items={[
-                                { title: "Plano de Piloto Detalhado", description: "Escopo, métricas de sucesso e cronograma." },
-                                { title: "Base de Dados de Resultados", description: "Dados brutos e processados do piloto." },
-                                { title: "Relatório de Análise de Desempenho", description: "Quantificação dos ganhos de eficiência/redução de CO2." }
-                            ]} />
-                        </PhaseCard>
-
-                        {/* FASE 4 */}
-                        <PhaseCard 
-                            phase="Fase 4" 
-                            title="Resultados e Próximos Passos" 
-                            duration="1 Semana" 
-                            objective="Consolidar os resultados e definir a estratégia de escala/comercialização."
-                        >
-                            <DeliverableList items={[
-                                { title: "Relatório Final do Projeto", description: "Resumo executivo, metodologia e aprendizados." },
-                                { title: "Proposta de Modelo de Negócio", description: "Plano de escala e comercialização." },
-                                { title: "Apresentação Executiva (Pitch Deck)", description: "Material para Demoday e investidores." }
-                            ]} />
-                        </PhaseCard>
-                    </div>
+            <DashboardCard title="Funcionalidades Implementadas (Sprints 1-2)" icon={<ChartBarIcon className="w-6 h-6" />}>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+                    <FeatureList title="Simulação da Usina" features={[
+                        "Monitoramento de produção e eficiência em tempo real.",
+                        "Seleção de múltiplos projetos de usinas (Standard, Nuclear, Renováveis).",
+                        "Controle de status da usina (Online, Offline, Manutenção).",
+                        "Ajuste de modo de combustível e mix flexível (H₂, Biodiesel).",
+                        "Simulação de perda de potência por temperatura ambiente.",
+                    ]} />
+                     <FeatureList title="Gestão de Turbinas" features={[
+                        "Visualização do status individual das turbinas (Térmicas e Eólicas).",
+                        "Controle de status (Ativa, Inativa, Erro) e simulação de manutenção.",
+                        "Modal de monitoramento detalhado com histórico de performance.",
+                        "Filtragem de turbinas por tipo.",
+                    ]} />
+                     <FeatureList title="Sistemas Utilitários" features={[
+                        "Visualização do fluxo de energia da trigeração.",
+                        "Monitoramento de Chiller de Absorção e recuperação de calor.",
+                        "Alocação de refrigeração para TIAC, Fogging e Data Center.",
+                        "Cálculo de economia energética da trigeração.",
+                        "Gestão de recursos (água, gás, etc.) com níveis de armazenamento.",
+                    ]} />
+                    <FeatureList title="Data Center" features={[
+                        "Dashboard com status de 120 racks de servidores.",
+                        "Monitoramento de PUE, consumo de energia e carga de refrigeração.",
+                        "Modal com detalhes de cada rack (CPU, GPU, Temp, Rede).",
+                        "Treemap interativo para análise de consumo de energia por rack.",
+                        "Diagrama de Sankey para fluxo de energia do Data Center.",
+                    ]} />
+                    <FeatureList title="Análise Financeira" features={[
+                        "Demonstração de Resultados (DRE) em tempo real.",
+                        "Análise de fontes de receita (Energia, Cloud, Créditos de Carbono).",
+                        "Estrutura de custos operacionais (OPEX).",
+                        "Acompanhamento de metas de receita e lucro.",
+                        "Exportação de relatório DRE para CSV.",
+                    ]} />
+                    <FeatureList title="Plataforma e UX" features={[
+                        "Navegação entre todas as seções principais.",
+                        "Criação e edição de novos projetos de usinas.",
+                        "Assistente de IA (Chatbot) com conhecimento do projeto.",
+                        "Páginas de conteúdo estático (Open Energy, MAUAX, etc.).",
+                        "Conexão com carteira de criptomoedas (MetaMask) na página de Trade.",
+                    ]} />
                 </div>
             </DashboardCard>
 
-             <div className="mt-6">
-                <DashboardCard title="Entregas Consolidadas do Projeto" icon={<TrendingUpIcon className="w-6 h-6" />}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-4">
-                        <div className="bg-gray-700/50 p-4 rounded-lg">
-                            <h4 className="font-bold text-cyan-400">1. Protótipo Funcional (MVP)</h4>
-                            <p className="text-sm text-gray-300 mt-2">Código-fonte e documentação técnica da solução.</p>
-                        </div>
-                         <div className="bg-gray-700/50 p-4 rounded-lg">
-                            <h4 className="font-bold text-cyan-400">2. Relatório de Desempenho</h4>
-                            <p className="text-sm text-gray-300 mt-2">Quantificação do valor gerado (eficiência operacional ou sustentabilidade).</p>
-                        </div>
-                         <div className="bg-gray-700/50 p-4 rounded-lg">
-                            <h4 className="font-bold text-cyan-400">3. Modelo de Negócio e Escala</h4>
-                            <p className="text-sm text-gray-300 mt-2">Plano estratégico para comercialização e crescimento.</p>
-                        </div>
-                         <div className="bg-gray-700/50 p-4 rounded-lg">
-                            <h4 className="font-bold text-cyan-400">4. Apresentação Executiva</h4>
-                            <p className="text-sm text-gray-300 mt-2">Pitch Deck para Demoday, resumindo todo o projeto.</p>
-                        </div>
-                    </div>
-                </DashboardCard>
-            </div>
+             <DashboardCard title="Roadmap de Desenvolvimento (Próximos Sprints)" icon={<TrendingUpIcon className="w-6 h-6" />}>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+                    <SprintCard 
+                        sprint="Sprint 3"
+                        title="Análise Nuclear Detalhada"
+                        description="Aprofundar a simulação da usina nuclear, substituindo a análise SMR genérica por dados e diagramas detalhados baseados em papers técnicos (ex: 'Energies 2024'), incluindo múltiplos ciclos (SRC, IRC)."
+                    />
+                     <SprintCard 
+                        sprint="Sprint 4"
+                        title="Refinamento de UI/UX e Acessibilidade"
+                        description="Realizar uma revisão completa da interface do usuário para garantir consistência visual, melhorar a experiência de navegação e implementar padrões de acessibilidade (ARIA)."
+                    />
+                     <SprintCard 
+                        sprint="Sprint 5"
+                        title="Modo Offline e PWA"
+                        description="Implementar funcionalidades offline usando Service Workers para permitir a consulta de dados em cache e converter a aplicação em um Progressive Web App (PWA) para instalação em dispositivos."
+                    />
+                     <SprintCard 
+                        sprint="Sprint 6"
+                        title="Integração de Dados Reais (POC)"
+                        description="Conectar a plataforma a APIs reais do setor elétrico (ex: CCEE, ONS) para substituir dados simulados de PLD e geração por informações em tempo real, validando o motor de precificação."
+                    />
+                     <SprintCard 
+                        sprint="Sprint 7"
+                        title="Módulo P2P Trading (EnerTradeZK)"
+                        description="Desenvolver e integrar smart contracts (ex: em uma L2 Ethereum) para permitir a tokenização real de energia (MEX-kWh) e a execução de transações P2P na plataforma."
+                    />
+                     <SprintCard 
+                        sprint="Sprint 8"
+                        title="Inteligência Artificial Avançada"
+                        description="Expandir as capacidades do assistente de IA para incluir análise preditiva proativa, geração de relatórios automáticos e recomendações personalizadas com base no perfil do usuário."
+                    />
+                </div>
+            </DashboardCard>
         </div>
     );
 };

@@ -11,6 +11,7 @@ import Configuration from './pages/Configuration';
 import OpenEnergy from './pages/OpenEnergy';
 import Chatbot from './application/Chatbot'; // Import the Chatbot component
 import MainDashboard from './pages/MainDashboard';
+import ProjectStatus from './pages/ProjectStatus';
 import { PlantStatus, FuelMode, TurbineStatus, Plant } from './types';
 import { POWER_PLANTS as initialPowerPlants } from './data/plants';
 
@@ -360,6 +361,8 @@ const App: React.FC = () => {
         return <OpenEnergy />;
       case 'EnerTradeZK':
         return <MainDashboard />;
+      case 'Project Status':
+        return <ProjectStatus />;
       default:
         return <PowerPlant 
           plantStatus={plantStatus}

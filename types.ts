@@ -92,3 +92,22 @@ export interface Plant {
   // FIX: Add optional status property for compatibility
   status?: string;
 }
+
+export interface MarketParticipant {
+  id: string;
+  name: string;
+  type: 'Gerador' | 'Distribuidor' | 'Consumidor';
+  capacity?: number; // MW for generators
+  demand?: number; // MW for consumers
+  price: number; // R$/MWh
+}
+
+export interface EnergyTransaction {
+  id: string;
+  from: string;
+  to: string;
+  amount: number; // in MEX-kWh
+  token: string;
+  txHash: string;
+  timestamp: string;
+}

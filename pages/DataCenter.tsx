@@ -30,17 +30,19 @@
  * - Claude, Grok, Gemini, Qwen, DeepSeek, GPT, Manus
  */
 import React, { useState, useEffect } from 'react';
-import ServerRackStatus from '../application/components/ServerRackStatus';
+import ServerRackStatus, { Rack } from '../application/components/ServerRackStatus';
 import PowerConsumption from '../application/components/PowerConsumption';
 import CoolingLoad from '../CoolingLoad';
 import DataCenterTreeMap from '../application/DataCenterTreeMap';
 import EnergyFlowSankey from '../application/components/EnergyFlowSankey';
 import DashboardCard from '../DashboardCard';
 import { BoltIcon } from '../application/components/icons';
+import DataCenterHeatmap from '../application/components/DataCenterHeatmap';
+import ServerRackDetailsModal from '../application/components/ServerRackDetailsModal';
 
 
-type DataCenterTab = 'overview' | 'treemap' | 'energyflow';
-type MaximizedWidget = 'treemap' | null;
+type DataCenterTab = 'overview' | 'treemap' | 'heatmap' | 'energyflow';
+type MaximizedWidget = 'treemap' | 'heatmap' | null;
 
 interface DataCenterProps {
   onActiveRackUpdate: (count: number) => void;
@@ -100,6 +102,7 @@ const BESSStatusCard: React.FC = () => {
 const DataCenter: React.FC<DataCenterProps> = ({ onActiveRackUpdate }) => {
   const [activeTab, setActiveTab] = useState<DataCenterTab>('overview');
   const [maximizedWidget, setMaximizedWidget] = useState<MaximizedWidget>(null);
+  const [selectedRack, setSelectedRack] = useState<Rack | null>(null);
 
   const tabButtonClasses = (tabName: DataCenterTab) =>
     `px-4 py-2 text-sm font-medium rounded-t-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-cyan-500 ${
@@ -125,78 +128,116 @@ const DataCenter: React.FC<DataCenterProps> = ({ onActiveRackUpdate }) => {
     );
   }
 
+  if (maximizedWidget === 'heatmap') {
+    return (
+      <div className="mt-6 h-[80vh]">
+        <DataCenterHeatmap 
+          isMaximizable 
+          isMaximized={true}
+          onToggleMaximize={() => toggleMaximize('heatmap')}
+          onRackClick={setSelectedRack}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className="mt-6">
-      <div className="border-b border-gray-700">
-        <nav className="-mb-px flex space-x-4" aria-label="Tabs">
-          <button
-            onClick={() => setActiveTab('overview')}
-            className={tabButtonClasses('overview')}
-            aria-current={activeTab === 'overview' ? 'page' : undefined}
-          >
-            Visão Geral
-          </button>
-          <button
-            onClick={() => setActiveTab('treemap')}
-            className={tabButtonClasses('treemap')}
-            aria-current={activeTab === 'treemap' ? 'page' : undefined}
-          >
-            Treemap de Consumo
-          </button>
-          <button
-            onClick={() => setActiveTab('energyflow')}
-            className={tabButtonClasses('energyflow')}
-            aria-current={activeTab === 'energyflow' ? 'page' : undefined}
-          >
-            Fluxo de Energia
-          </button>
-        </nav>
-      </div>
-
+    <>
       <div className="mt-6">
-        {activeTab === 'overview' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fadeIn">
-            <div className="lg:col-span-1">
-              <PowerConsumption />
-            </div>
-            <div className="lg:col-span-1">
-              <CoolingLoad />
-            </div>
-             <div className="lg:col-span-1">
-              <BESSStatusCard />
-            </div>
-            <div className="lg:col-span-3">
-              <ServerRackStatus onRackDataUpdate={onActiveRackUpdate} />
-            </div>
-          </div>
-        )}
-        {activeTab === 'treemap' && (
-          <div className="animate-fadeIn">
-            <DataCenterTreeMap 
-              isMaximizable
-              isMaximized={false}
-              onToggleMaximize={() => toggleMaximize('treemap')}
-            />
-          </div>
-        )}
-        {activeTab === 'energyflow' && (
-            <div className="animate-fadeIn">
-                <EnergyFlowSankey />
-            </div>
-        )}
-      </div>
+        <div className="border-b border-gray-700">
+          <nav className="-mb-px flex space-x-4" aria-label="Tabs">
+            <button
+              onClick={() => setActiveTab('overview')}
+              className={tabButtonClasses('overview')}
+              aria-current={activeTab === 'overview' ? 'page' : undefined}
+            >
+              Visão Geral
+            </button>
+            <button
+              onClick={() => setActiveTab('treemap')}
+              className={tabButtonClasses('treemap')}
+              aria-current={activeTab === 'treemap' ? 'page' : undefined}
+            >
+              Treemap de Consumo
+            </button>
+            <button
+              onClick={() => setActiveTab('heatmap')}
+              className={tabButtonClasses('heatmap')}
+              aria-current={activeTab === 'heatmap' ? 'page' : undefined}
+            >
+              Heatmap
+            </button>
+            <button
+              onClick={() => setActiveTab('energyflow')}
+              className={tabButtonClasses('energyflow')}
+              aria-current={activeTab === 'energyflow' ? 'page' : undefined}
+            >
+              Fluxo de Energia
+            </button>
+          </nav>
+        </div>
 
-      {/* Inline animation definition for encapsulation */}
-      <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fadeIn { 
-          animation: fadeIn 0.3s ease-in-out; 
-        }
-      `}</style>
-    </div>
+        <div className="mt-6">
+          {activeTab === 'overview' && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fadeIn">
+              <div className="lg:col-span-1">
+                <PowerConsumption />
+              </div>
+              <div className="lg:col-span-1">
+                <CoolingLoad />
+              </div>
+              <div className="lg:col-span-1">
+                <BESSStatusCard />
+              </div>
+              <div className="lg:col-span-3">
+                <ServerRackStatus onRackDataUpdate={onActiveRackUpdate} onRackClick={setSelectedRack} />
+              </div>
+            </div>
+          )}
+          {activeTab === 'treemap' && (
+            <div className="animate-fadeIn">
+              <DataCenterTreeMap 
+                isMaximizable
+                isMaximized={false}
+                onToggleMaximize={() => toggleMaximize('treemap')}
+              />
+            </div>
+          )}
+          {activeTab === 'heatmap' && (
+            <div className="animate-fadeIn">
+              <DataCenterHeatmap
+                isMaximizable
+                isMaximized={false}
+                onToggleMaximize={() => toggleMaximize('heatmap')}
+                onRackClick={setSelectedRack}
+              />
+            </div>
+          )}
+          {activeTab === 'energyflow' && (
+              <div className="animate-fadeIn">
+                  <EnergyFlowSankey />
+              </div>
+          )}
+        </div>
+
+        {/* Inline animation definition for encapsulation */}
+        <style>{`
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          .animate-fadeIn { 
+            animation: fadeIn 0.3s ease-in-out; 
+          }
+        `}</style>
+      </div>
+      {selectedRack && (
+        <ServerRackDetailsModal
+          rack={selectedRack}
+          onClose={() => setSelectedRack(null)}
+        />
+      )}
+    </>
   );
 };
 

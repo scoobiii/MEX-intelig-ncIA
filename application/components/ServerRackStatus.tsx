@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import DashboardCard from '../../DashboardCard';
-import ServerRackDetailsModal from './ServerRackDetailsModal';
 import { ServerRackIcon } from './icons';
 
 export interface Rack {
@@ -19,6 +18,7 @@ export interface Rack {
 
 interface ServerRackStatusProps {
   onRackDataUpdate: (count: number) => void;
+  onRackClick: (rack: Rack) => void;
 }
 
 const generateInitialRackData = (): Rack[] => {
@@ -93,9 +93,8 @@ const CompactRackCard: React.FC<{ rack: Rack; onClick: () => void; }> = ({ rack,
   );
 };
 
-const ServerRackStatus: React.FC<ServerRackStatusProps> = ({ onRackDataUpdate }) => {
+const ServerRackStatus: React.FC<ServerRackStatusProps> = ({ onRackDataUpdate, onRackClick }) => {
   const [racks, setRacks] = useState<Rack[]>([]);
-  const [selectedRack, setSelectedRack] = useState<Rack | null>(null);
 
   useEffect(() => {
     setRacks(generateInitialRackData());
@@ -180,17 +179,11 @@ const ServerRackStatus: React.FC<ServerRackStatusProps> = ({ onRackDataUpdate })
             <CompactRackCard
               key={rack.id}
               rack={rack}
-              onClick={() => setSelectedRack(rack)}
+              onClick={() => onRackClick(rack)}
             />
           ))}
         </div>
       </DashboardCard>
-      {selectedRack && (
-        <ServerRackDetailsModal
-          rack={selectedRack}
-          onClose={() => setSelectedRack(null)}
-        />
-      )}
     </>
   );
 };
