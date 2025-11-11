@@ -6,7 +6,9 @@ export type Page =
     'Data Center' | 
     'Financials' | 
     'Configuration' | 
-    'Infrastructure';
+    'Infrastructure' |
+    'Open Energy' |
+    'Project Status';
 
 interface NavItem {
     label: string;
@@ -20,6 +22,8 @@ const navItems: NavItem[] = [
     { label: 'Financeiro', page: 'Financials' },
     { label: 'Configuração', page: 'Configuration' },
     { label: 'Infraestrutura', page: 'Infrastructure' },
+    { label: 'Open Energy', page: 'Open Energy' },
+    { label: 'Status do Projeto', page: 'Project Status' },
 ];
 
 interface NavigationProps {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
     PlantStatus, 
     FuelMode, 
@@ -21,6 +21,7 @@ import HistoricalData from '../application/components/HistoricalData';
 import ResourceManagement from '../application/components/ResourceManagement';
 import NuclearPlantInfo from '../application/components/NuclearPlantInfo';
 import NuclearProjectAnalysis from '../application/components/NuclearProjectAnalysis';
+import RenewablePlantInfo from '../application/components/RenewablePlantInfo';
 
 // --- PROPS INTERFACE ---
 interface PowerPlantProps {
@@ -85,13 +86,24 @@ const initialAlerts: Alert[] = [
     { id: 2, level: 'info', message: 'Manutenção preventiva da Turbina #5 agendada para 2024-08-10.', timestamp: '2024-08-05 09:30:00' },
 ];
 
-const initialTurbines: Omit<Turbine, 'status' | 'maintenanceScore'>[] = [
+const initialThermalTurbines: Omit<Turbine, 'status' | 'maintenanceScore'>[] = [
     { id: 1, rpm: 3600, temp: 950, pressure: 18, type: 'Ciclo Combinado', manufacturer: 'Siemens', model: 'SGT-9000HL', isoCapacity: 500 },
     { id: 2, rpm: 3605, temp: 955, pressure: 18.2, type: 'Ciclo Combinado', manufacturer: 'Siemens', model: 'SGT-9000HL', isoCapacity: 500 },
     { id: 3, rpm: 3598, temp: 965, pressure: 17.9, type: 'Ciclo Combinado', manufacturer: 'Siemens', model: 'SGT-9000HL', isoCapacity: 500 },
     { id: 4, rpm: 3600, temp: 940, pressure: 18.1, type: 'Ciclo Rankine', manufacturer: 'GE', model: '7HA.02', isoCapacity: 500 },
     { id: 5, rpm: 0, temp: 80, pressure: 1, type: 'Ciclo Rankine', manufacturer: 'GE', model: '7HA.02', isoCapacity: 500 },
 ];
+
+const initialWindTurbines: Omit<Turbine, 'status' | 'maintenanceScore'>[] = Array.from({ length: 50 }, (_, i) => ({
+    id: i + 1,
+    type: 'Eólica',
+    manufacturer: 'Vestas',
+    model: 'V164-9.5MW',
+    isoCapacity: 9.5,
+    bladeRPM: 12 + Math.random() * 4,
+    windSpeed: 10 + Math.random() * 8,
+    powerOutput: 8 + Math.random() * 1.5,
+}));
 
 type WidgetKey = 'power' | 'fuel' | 'emissions' | 'resources' | 'turbines' | 'history';
 type TurbineTypeFilter = 'all' | 'Ciclo Combinado' | 'Ciclo Rankine';
@@ -148,6 +160,11 @@ const PowerPlant: React.FC<PowerPlantProps> = ({
 
     // Ambient conditions state
     const [ambient, setAmbient] = useState({ dry: 28.5, wet: 22.1, humidity: 65 });
+
+    const fuelModeRef = useRef(fuelMode);
+    useEffect(() => {
+        fuelModeRef.current = fuelMode;
+    }, [fuelMode]);
 
     // --- EFFECTS FOR DYNAMIC DATA ---
 
@@ -270,30 +287,40 @@ const PowerPlant: React.FC<PowerPlantProps> = ({
     // Simulate real-time data updates for turbines and ambient conditions
     useEffect(() => {
         const interval = setInterval(() => {
-            setTurbines(prev => prev.map(t => {
-                if (t.status !== 'active') return { ...t, rpm: 0, temp: 80, pressure: 1 };
+            const currentFuelMode = fuelModeRef.current;
+            const isWind = currentFuelMode === FuelMode.WindBess;
 
-                const newRpm = 3590 + Math.random() * 25;
-                const newTemp = 935 + Math.random() * 40;
-                const newPressure = 17.7 + Math.random() * 0.6;
+            setTurbines(prev => prev.map(t => {
+                if (t.status !== 'active') {
+                    if (isWind) return {...t, powerOutput: 0, windSpeed: 0, bladeRPM: 0, history: []};
+                    return { ...t, rpm: 0, temp: 80, pressure: 1, history: [] };
+                }
+
+                let newHistoryPoint;
+                let updates;
+
+                if (isWind) {
+                    const newWindSpeed = Math.max(3, Math.min(25, (t.windSpeed || 14) + (Math.random() - 0.48) * 2));
+                    // Simple power curve: Power ~ wind_speed^3, capped at isoCapacity
+                    const powerRatio = Math.pow(newWindSpeed / 14, 3); // 14 m/s is rated wind speed
+                    const newPowerOutput = Math.max(0, Math.min(t.isoCapacity, t.isoCapacity * powerRatio + (Math.random() - 0.5) * 0.2));
+                    const newBladeRPM = newPowerOutput > 0 ? 8 + (newPowerOutput / t.isoCapacity) * 8 : 0;
+                    
+                    newHistoryPoint = { time: '0s', powerOutput: newPowerOutput, windSpeed: newWindSpeed, bladeRPM: newBladeRPM };
+                    updates = { powerOutput: newPowerOutput, windSpeed: newWindSpeed, bladeRPM: newBladeRPM };
+                } else {
+                    const newRpm = 3590 + Math.random() * 25;
+                    const newTemp = 935 + Math.random() * 40;
+                    const newPressure = 17.7 + Math.random() * 0.6;
+                    
+                    newHistoryPoint = { time: '0s', rpm: newRpm, temp: newTemp, pressure: newPressure };
+                    updates = { rpm: newRpm, temp: newTemp, pressure: newPressure };
+                }
                 
-                 // Update history
-                const newHistoryPoint = {
-                    time: '0s',
-                    rpm: newRpm,
-                    temp: newTemp,
-                    pressure: newPressure,
-                };
                 const updatedHistory = [newHistoryPoint, ...(t.history || []).slice(0, 19)]
                     .map((p, i) => ({ ...p, time: `${i}s`}));
 
-                return {
-                    ...t,
-                    rpm: newRpm,
-                    temp: newTemp,
-                    pressure: newPressure,
-                    history: updatedHistory,
-                };
+                return { ...t, ...updates, history: updatedHistory };
             }));
             
             setAmbient(prev => ({
@@ -308,23 +335,48 @@ const PowerPlant: React.FC<PowerPlantProps> = ({
 
     // Merge static turbine data with dynamic status from props
     useEffect(() => {
-        setTurbines(initialTurbines.map(t => {
-            const status = turbineStatusConfig[t.id] || 'inactive';
-            const history = Array.from({ length: 20 }, (_, i) => ({
-                time: `${19 - i}s`,
-                rpm: status === 'active' ? 3590 + Math.random() * 25 : 0,
-                temp: status === 'active' ? 935 + Math.random() * 40 : 80,
-                pressure: status === 'active' ? 17.7 + Math.random() * 0.6 : 1,
-            }));
+        const isWind = fuelMode === FuelMode.WindBess;
+        const initialData = isWind ? initialWindTurbines : initialThermalTurbines;
 
-            return {
+        setTurbines(initialData.map(t => {
+            const status = turbineStatusConfig[t.id] || (isWind ? 'active' : 'inactive'); // default wind turbines to active
+            const history = Array.from({ length: 20 }, (_, i) => {
+                if(isWind) {
+                    return {
+                        time: `${19 - i}s`,
+                        powerOutput: status === 'active' ? (t.isoCapacity * 0.8) + Math.random() * (t.isoCapacity * 0.15) : 0,
+                        windSpeed: status === 'active' ? 10 + Math.random() * 8 : 0,
+                        bladeRPM: status === 'active' ? 12 + Math.random() * 4 : 0,
+                    }
+                }
+                return {
+                    time: `${19 - i}s`,
+                    rpm: status === 'active' ? 3590 + Math.random() * 25 : 0,
+                    temp: status === 'active' ? 935 + Math.random() * 40 : 80,
+                    pressure: status === 'active' ? 17.7 + Math.random() * 0.6 : 1,
+                }
+            });
+
+            const baseTurbine: Turbine = {
                 ...t,
                 status,
-                maintenanceScore: turbineMaintenanceScores[t.id] || 0,
+                maintenanceScore: turbineMaintenanceScores[t.id] || Math.random() * 20, // Lower maintenance score for wind for now
                 history,
             };
+
+            if (isWind) {
+                baseTurbine.powerOutput = history[0].powerOutput;
+                baseTurbine.windSpeed = history[0].windSpeed;
+                baseTurbine.bladeRPM = history[0].bladeRPM;
+            } else {
+                baseTurbine.rpm = history[0].rpm;
+                baseTurbine.temp = history[0].temp;
+                baseTurbine.pressure = history[0].pressure;
+            }
+
+            return baseTurbine;
         }));
-    }, [turbineStatusConfig, turbineMaintenanceScores]);
+    }, [turbineStatusConfig, turbineMaintenanceScores, fuelMode]);
 
     // --- HANDLERS ---
     const handlePerformMaintenance = (turbineId: number) => {
@@ -350,13 +402,19 @@ const PowerPlant: React.FC<PowerPlantProps> = ({
         return powerOutput * tempDifference * LOSS_FACTOR_PER_DEGREE;
     }, [ambient.dry, powerOutput, plantStatus]);
 
+    const isRenewable = useMemo(() => fuelMode === FuelMode.WindBess || fuelMode === FuelMode.SolarBess, [fuelMode]);
+    const isNuclear = useMemo(() => fuelMode === FuelMode.Nuclear, [fuelMode]);
+    const isThermal = !isRenewable && !isNuclear;
+
     const filteredTurbines = useMemo(() => {
+        if (fuelMode === FuelMode.WindBess) return turbines; // Show all wind turbines, no filter needed
+        
         const visibleTurbines = turbines.filter(t => t.status !== 'inactive');
         if (turbineTypeFilter === 'all') {
             return visibleTurbines;
         }
         return visibleTurbines.filter(t => t.type === turbineTypeFilter);
-    }, [turbines, turbineTypeFilter]);
+    }, [turbines, turbineTypeFilter, fuelMode]);
 
     const selectedTurbine = useMemo(() => {
         return turbines.find(t => t.id === selectedTurbineId) || null;
@@ -369,7 +427,8 @@ const PowerPlant: React.FC<PowerPlantProps> = ({
     return (
         <div className="mt-6">
             <div className="mt-6 grid grid-cols-12 gap-6">
-                <div className={maximizedStates.power ? "col-span-12" : "col-span-12 md:col-span-6 lg:col-span-3 h-full"}>
+                {/* Row 1: Core KPIs */}
+                <div className={maximizedStates.power ? "col-span-12" : `col-span-12 md:col-span-6 ${isThermal ? 'lg:col-span-3' : 'lg:col-span-4'} h-full`}>
                     <PowerOutput 
                         powerOutput={powerOutput} 
                         efficiency={efficiency} 
@@ -385,23 +444,34 @@ const PowerPlant: React.FC<PowerPlantProps> = ({
                         onToggleMaximize={() => toggleMaximize('power')}
                     />
                 </div>
-                <div className={maximizedStates.fuel ? "col-span-12" : "col-span-12 md:col-span-6 lg:col-span-3 h-full"}>
-                    <FuelStatus 
-                        fuelMode={fuelMode}
-                        consumption={historicalData.slice(-1)[0]?.consumption || 380}
-                        flexMix={flexMix}
-                        setFlexMix={setFlexMix}
-                        isMaximizable
-                        isMaximized={maximizedStates.fuel}
-                        onToggleMaximize={() => toggleMaximize('fuel')}
-                        historicalData={historicalData}
-                        timeRange={timeRange}
-                        setTimeRange={setTimeRange}
-                    />
-                </div>
-                <div className={maximizedStates.emissions ? "col-span-12" : "col-span-12 md:col-span-6 lg:col-span-3 h-full"}>
-                   {fuelMode === FuelMode.Nuclear ? (
+
+                {isThermal && (
+                    <div className={maximizedStates.fuel ? "col-span-12" : "col-span-12 md:col-span-6 lg:col-span-3 h-full"}>
+                        <FuelStatus 
+                            fuelMode={fuelMode}
+                            consumption={historicalData.slice(-1)[0]?.consumption || 380}
+                            flexMix={flexMix}
+                            setFlexMix={setFlexMix}
+                            isMaximizable
+                            isMaximized={maximizedStates.fuel}
+                            onToggleMaximize={() => toggleMaximize('fuel')}
+                            historicalData={historicalData}
+                            timeRange={timeRange}
+                            setTimeRange={setTimeRange}
+                        />
+                    </div>
+                )}
+                
+                <div className={maximizedStates.emissions ? "col-span-12" : `col-span-12 md:col-span-6 ${isThermal ? 'lg:col-span-3' : 'lg:col-span-4'} h-full`}>
+                    {isNuclear ? (
                         <NuclearPlantInfo
+                            isMaximizable
+                            isMaximized={maximizedStates.emissions}
+                            onToggleMaximize={() => toggleMaximize('emissions')}
+                        />
+                    ) : isRenewable ? (
+                        <RenewablePlantInfo 
+                            fuelMode={fuelMode as 'WIND_BESS' | 'SOLAR_BESS'}
                             isMaximizable
                             isMaximized={maximizedStates.emissions}
                             onToggleMaximize={() => toggleMaximize('emissions')}
@@ -419,47 +489,71 @@ const PowerPlant: React.FC<PowerPlantProps> = ({
                         />
                     )}
                 </div>
-                <div className={maximizedStates.resources ? "col-span-12" : "col-span-12 md:col-span-6 lg:col-span-3 h-full"}>
-                    <ResourceManagement
-                        {...resourceData}
-                        historicalData={historicalResourceData}
-                        resourceConfig={resourceConfig}
-                        isMaximizable
-                        isMaximized={maximizedStates.resources}
-                        onToggleMaximize={() => toggleMaximize('resources')}
-                    />
-                </div>
-                
-                <div className={`col-span-12 ${maximizedStates.turbines ? 'h-[80vh]' : ''}`}>
-                    <TurbineStatus 
-                        turbines={filteredTurbines} 
-                        onSelectTurbine={setSelectedTurbineId} 
-                        selectedTurbineId={selectedTurbineId}
-                        isMaximizable
-                        isMaximized={maximizedStates.turbines}
-                        onToggleMaximize={() => toggleMaximize('turbines')}
-                        turbineTypeFilter={turbineTypeFilter}
-                        setTurbineTypeFilter={setTurbineTypeFilter}
-                        onPerformMaintenance={handlePerformMaintenance}
-                    />
-                </div>
 
-                <div className={`col-span-12 ${maximizedStates.history ? 'h-[80vh]' : ''}`}>
-                    <HistoricalData
-                        data={historicalData}
-                        timeRange={timeRange}
-                        setTimeRange={setTimeRange}
-                        isMaximizable
-                        isMaximized={maximizedStates.history}
-                        onToggleMaximize={() => toggleMaximize('history')}
-                    />
-                </div>
-                {fuelMode === FuelMode.Nuclear && (
+                {isThermal && (
+                    <div className={maximizedStates.resources ? "col-span-12" : "col-span-12 md:col-span-6 lg:col-span-3 h-full"}>
+                        <ResourceManagement
+                            {...resourceData}
+                            historicalData={historicalResourceData}
+                            resourceConfig={resourceConfig}
+                            isMaximizable
+                            isMaximized={maximizedStates.resources}
+                            onToggleMaximize={() => toggleMaximize('resources')}
+                        />
+                    </div>
+                )}
+
+                {!isThermal && (
+                     <div className={maximizedStates.history ? "col-span-12" : `col-span-12 md:col-span-6 lg:col-span-4 h-full`}>
+                        <HistoricalData
+                            data={historicalData}
+                            timeRange={timeRange}
+                            setTimeRange={setTimeRange}
+                            isMaximizable
+                            isMaximized={maximizedStates.history}
+                            onToggleMaximize={() => toggleMaximize('history')}
+                        />
+                    </div>
+                )}
+
+                {/* Row 2: Main Components */}
+                {(isThermal || fuelMode === FuelMode.WindBess) && (
+                    <div className={`col-span-12 ${maximizedStates.turbines ? 'h-[80vh]' : ''}`}>
+                        <TurbineStatus 
+                            turbines={filteredTurbines} 
+                            onSelectTurbine={setSelectedTurbineId} 
+                            selectedTurbineId={selectedTurbineId}
+                            isMaximizable
+                            isMaximized={maximizedStates.turbines}
+                            onToggleMaximize={() => toggleMaximize('turbines')}
+                            turbineTypeFilter={turbineTypeFilter}
+                            setTurbineTypeFilter={setTurbineTypeFilter}
+                            onPerformMaintenance={handlePerformMaintenance}
+                        />
+                    </div>
+                )}
+                
+                {isThermal && (
+                    <div className={`col-span-12 ${maximizedStates.history ? 'h-[80vh]' : ''}`}>
+                        <HistoricalData
+                            data={historicalData}
+                            timeRange={timeRange}
+                            setTimeRange={setTimeRange}
+                            isMaximizable
+                            isMaximized={maximizedStates.history}
+                            onToggleMaximize={() => toggleMaximize('history')}
+                        />
+                    </div>
+                )}
+                
+                {isNuclear && (
                     <div className="col-span-12 mt-6">
                         <NuclearProjectAnalysis />
                     </div>
                 )}
             </div>
+
+            {/* Modal */}
             {selectedTurbine && (
                 <MainTurbineMonitor
                     turbine={selectedTurbine}

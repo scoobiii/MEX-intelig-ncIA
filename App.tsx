@@ -7,6 +7,8 @@ import DataCenter from './pages/DataCenter';
 import Infrastructure from './pages/Infrastructure';
 import Financials from './pages/Financials';
 import Configuration from './pages/Configuration';
+import OpenEnergy from './pages/OpenEnergy';
+import ProjectStatus from './pages/ProjectStatus';
 import { PlantStatus, FuelMode, TurbineStatus, Plant } from './types';
 import { POWER_PLANTS as initialPowerPlants } from './data/plants';
 
@@ -349,6 +351,10 @@ const App: React.FC = () => {
           resourceConfig={resourceConfig}
           setResourceConfig={setResourceConfig}
         />;
+      case 'Open Energy':
+        return <OpenEnergy />;
+      case 'Project Status':
+        return <ProjectStatus />;
       default:
         return <PowerPlant 
           plantStatus={plantStatus}
