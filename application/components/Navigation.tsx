@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 
 export type Page = 
@@ -7,7 +8,8 @@ export type Page =
     'Data Center' | 
     'Financials' | 
     'Configuration' | 
-    'Infrastructure' |
+    'SIN' |
+    'Grid Analysis' |
     'Open Energy' |
     'EnerTradeZK' |
     'Project Status';
@@ -23,7 +25,8 @@ const navItems: NavItem[] = [
     { label: 'Data Center', page: 'Data Center' },
     { label: 'Financeiro', page: 'Financials' },
     { label: 'Configuração', page: 'Configuration' },
-    { label: 'MAUAX', page: 'Infrastructure' },
+    { label: 'SIN', page: 'SIN' },
+    { label: 'Análise de Rede', page: 'Grid Analysis' },
     { label: 'Open Energy', page: 'Open Energy' },
     { label: 'MEX Trade', page: 'EnerTradeZK' },
     { label: 'Status', page: 'Project Status' },

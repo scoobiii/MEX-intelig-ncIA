@@ -103,6 +103,7 @@ const NationalInventory: React.FC = () => {
             acc[p.fuel].count++;
             acc[p.fuel].power += p.powerMW;
             return acc;
+        // @FIX: Cast the initial object of reduce to a typed object to prevent type errors.
         }, {} as Record<string, { count: number; power: number }>);
 
         return Object.entries(fuelMap).map(([name, data]) => ({ name, ...data }));
@@ -113,6 +114,7 @@ const NationalInventory: React.FC = () => {
         const powerMap = filteredPlants.reduce((acc, p) => {
             acc[p.uf] = (acc[p.uf] || 0) + p.powerMW;
             return acc;
+        // @FIX: Cast the initial object of reduce to `Record<string, number>` to ensure `acc[p.uf]` is treated as a number for arithmetic operations.
         }, {} as Record<string, number>);
         
         return Object.entries(powerMap)
@@ -171,6 +173,7 @@ const NationalInventory: React.FC = () => {
         const statusCounts = filteredPlants.reduce((acc, p) => {
             acc[p.status] = (acc[p.status] || 0) + 1;
             return acc;
+        // @FIX: Cast the initial object of reduce to correctly type the accumulator for arithmetic operations, resolving potential runtime errors.
         }, {} as Record<'Em Operação' | 'Em Construção' | 'Outorgada', number>);
         return { totalPower, statusCounts };
     }, [filteredPlants]);

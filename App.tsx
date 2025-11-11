@@ -1,11 +1,13 @@
 
+
 import React, { useState, useEffect, useMemo } from 'react';
 import Header from './application/Header';
 import Navigation, { Page } from './application/components/Navigation';
 import PowerPlant from './pages/PowerPlant';
 import Utilities from './pages/Utilities';
 import DataCenter from './pages/DataCenter';
-import Infrastructure from './pages/Infrastructure';
+import SINMap from './pages/SINMap';
+import GridAnalysis from './pages/GridAnalysis';
 import Financials from './pages/Financials';
 import Configuration from './pages/Configuration';
 import OpenEnergy from './pages/OpenEnergy';
@@ -297,11 +299,6 @@ const App: React.FC = () => {
     }
   }, [plantStatus, powerOutput, selectedPlant, efficiency]);
 
-  // Special case for full-screen pages
-  if (currentPage === 'Infrastructure') {
-    return <Infrastructure />;
-  }
-
   const renderPage = () => {
     switch (currentPage) {
       case 'Power Plant':
@@ -357,6 +354,10 @@ const App: React.FC = () => {
           resourceConfig={resourceConfig}
           setResourceConfig={setResourceConfig}
         />;
+      case 'SIN':
+        return <SINMap />;
+      case 'Grid Analysis':
+        return <GridAnalysis />;
       case 'Open Energy':
         return <OpenEnergy />;
       case 'EnerTradeZK':
