@@ -1,7 +1,7 @@
 import React from 'react';
 import DashboardCard from '../../DashboardCard';
 import { NVIDIA_PLATFORMS } from '../../data/nvidiaPlatforms';
-// FIX: Import ComputerDesktopIcon to use as the icon for the DashboardCard.
+// Import ComputerDesktopIcon to use as the icon for the DashboardCard.
 import { ComputerDesktopIcon } from './icons';
 
 const PlatformDetails: React.FC = () => {

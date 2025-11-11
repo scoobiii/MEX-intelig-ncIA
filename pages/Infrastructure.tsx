@@ -4,8 +4,8 @@ const Infrastructure: React.FC = () => {
   return (
     <div className="mt-6">
       <iframe
-        src="https://xevivudr.manussite.space/"
-        title="Visualização da Infraestrutura"
+        src="http://mex.eco.br/"
+        title="MAUAX"
         className="w-full h-[80vh] border-0 rounded-lg shadow-lg"
         allowFullScreen
       ></iframe>

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import DashboardCard from '../../DashboardCard';
-// FIX: Import necessary icons for DashboardCard.
+// Import necessary icons for DashboardCard.
 import { ActivityIcon, SnowflakeIcon, ThermometerIcon, CloudIcon, ChartBarIcon, InfoIcon } from './icons';
 
 // Using window.mermaid as it's loaded from a script tag in index.html
@@ -92,7 +92,7 @@ const PedreiraProjectAnalysis: React.FC = () => {
         }
     }, []);
 
-    // FIX: Added `icon` prop to satisfy DashboardCardProps.
+    // Added `icon` prop to satisfy DashboardCardProps.
     const FinancialInfoCard: React.FC<{title: string; capex: string; opex: string; contribution: string; icon: React.ReactNode; children?: React.ReactNode}> = ({ title, capex, opex, contribution, icon, children }) => (
         <DashboardCard title={title} icon={icon}>
             <div className="space-y-4">

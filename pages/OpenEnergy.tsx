@@ -1,4 +1,6 @@
 import React from 'react';
+import DashboardCard from '../DashboardCard';
+import { ChartBarIcon, TrendingUpIcon } from '../application/components/icons';
 
 const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
     <section className="mb-12 animate-fadeIn" style={{ animationDelay: '100ms' }}>
@@ -22,6 +24,35 @@ const BulletPoint: React.FC<{ children: React.ReactNode }> = ({ children }) => (
         <span>{children}</span>
     </li>
 );
+
+const PhaseCard: React.FC<{ phase: string; title: string; duration: string; objective: string; children: React.ReactNode; }> = ({ phase, title, duration, objective, children }) => (
+    <div className="bg-gray-900/50 p-6 rounded-lg border border-gray-700">
+        <div className="flex items-baseline gap-4 mb-3">
+            <span className="text-xl font-bold text-cyan-500">{phase}</span>
+            <h3 className="text-2xl font-bold text-white">{title}</h3>
+        </div>
+        <p className="text-sm text-gray-400 mb-2"><strong>Duração Estimada:</strong> {duration}</p>
+        <p className="text-sm text-gray-300 mb-4"><strong>Objetivo:</strong> {objective}</p>
+        <div className="border-t border-gray-600 pt-4">
+            {children}
+        </div>
+    </div>
+);
+
+const DeliverableList: React.FC<{ items: { title: string; description: string; }[] }> = ({ items }) => (
+    <div>
+        <h4 className="font-semibold text-cyan-400 mb-2">Entregas Chave:</h4>
+        <ul className="space-y-2 text-sm text-gray-300">
+            {items.map((item, index) => (
+                <li key={index} className="flex">
+                    <span className="text-cyan-400 mr-2">&#10148;</span>
+                    <span><strong>{item.title}:</strong> {item.description}</span>
+                </li>
+            ))}
+        </ul>
+    </div>
+);
+
 
 const OpenEnergy: React.FC = () => {
     return (
@@ -65,68 +96,67 @@ const OpenEnergy: React.FC = () => {
                     </SubSection>
                 </Section>
                 
-                <Section title="2. Diferenciais Competitivos">
-                    <div className="grid md:grid-cols-2 gap-6">
-                        <SubSection title="Tecnologia Proprietária">
-                            <ul className="space-y-2">
-                                <BulletPoint><strong>IA Generativa</strong> para análise de contratos e documentos regulatórios</BulletPoint>
-                                <BulletPoint><strong>Machine Learning</strong> para previsão de preços e demanda</BulletPoint>
-                                <BulletPoint><strong>NLP (Processamento de Linguagem Natural)</strong> para assistente conversacional</BulletPoint>
-                            </ul>
-                        </SubSection>
-                        <SubSection title="Vantagens Únicas">
-                             <ul className="space-y-2">
-                                <BulletPoint>✅ <strong>Plataforma única</strong> que integra marketplace, análise preditiva e assistente IA</BulletPoint>
-                                <BulletPoint>✅ <strong>Parceria estratégica</strong> com CCEE para dados oficiais</BulletPoint>
-                                <BulletPoint>✅ <strong>Neutralidade</strong>: não somos comercializadora, somos facilitadores</BulletPoint>
-                                <BulletPoint>✅ <strong>UX simplificada</strong>: experiência de app financeiro para o setor energético</BulletPoint>
-                            </ul>
-                        </SubSection>
-                    </div>
-                </Section>
+                <Section title="2. Status do Projeto e Roadmap">
+                    <SubSection title="Plano de Trabalho e Entregas">
+                         <div className="p-4 space-y-8">
+                            <p className="text-center text-gray-400">
+                                Síntese de um plano de trabalho para um projeto genérico de inovação no setor de energia, estruturado a partir da análise dos desafios de grandes players do mercado.
+                            </p>
+                            
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                <PhaseCard 
+                                    phase="Fase 1" 
+                                    title="Concepção e Alinhamento Estratégico" 
+                                    duration="2 Semanas" 
+                                    objective="Definir o escopo, a proposta de valor e o alinhamento regulatório da solução."
+                                >
+                                    <DeliverableList items={[
+                                        { title: "Análise de Mercado e Requisitos", description: "Incluindo LGPD e padrões do setor elétrico." },
+                                        { title: "Lean Canvas / Proposta de Valor", description: "Definição clara do modelo de negócio." },
+                                        { title: "Desenho da Arquitetura de Dados", description: "Fontes, fluxos, segurança e consentimento." }
+                                    ]} />
+                                </PhaseCard>
 
-                <Section title="3. Tratamento de Dados e Segurança">
-                     <div className="grid md:grid-cols-2 gap-6">
-                        <SubSection title="Fontes de Dados">
-                             <ul className="space-y-2">
-                                <BulletPoint><strong>CCEE:</strong> Preços PLD, volumes negociados</BulletPoint>
-                                <BulletPoint><strong>ONS:</strong> Despacho, carga, geração</BulletPoint>
-                                <BulletPoint><strong>Comercializadoras:</strong> Ofertas via API (parceiros)</BulletPoint>
-                                <BulletPoint><strong>Clientes:</strong> Dados de consumo (opt-in)</BulletPoint>
-                            </ul>
-                        </SubSection>
-                        <SubSection title="Segurança e Compliance">
-                             <ul className="space-y-2">
-                                <BulletPoint>🔒 <strong>LGPD Compliant:</strong> consentimento, portabilidade, anonimização</BulletPoint>
-                                <BulletPoint>🔒 <strong>Criptografia end-to-end</strong> para dados sensíveis</BulletPoint>
-                                <BulletPoint>🔒 <strong>ISO 27001</strong> em processo de certificação</BulletPoint>
-                            </ul>
-                        </SubSection>
-                    </div>
-                </Section>
+                                <PhaseCard 
+                                    phase="Fase 2" 
+                                    title="Desenvolvimento e Prova de Conceito (PoC)" 
+                                    duration="4 Semanas" 
+                                    objective="Construir o protótipo funcional e validar a viabilidade técnica da solução."
+                                >
+                                    <DeliverableList items={[
+                                        { title: "Protótipo Funcional (MVP)", description: "Código-fonte da solução mínima viável." },
+                                        { title: "Relatório de Teste de Integração", description: "Demonstração da capacidade de processar dados." },
+                                        { title: "Relatório de Prova de Conceito (PoC)", description: "Métricas de viabilidade técnica." }
+                                    ]} />
+                                </PhaseCard>
 
-                <Section title="4. Modelo de Negócio e Proposta de POC">
-                    <SubSection title="Modelo de Receita (Três Pilares)">
-                        <ol className="list-decimal list-inside space-y-2">
-                            <li><strong>Freemium para Consumidores:</strong> Gratuito (análise básica) e Premium.</li>
-                            <li><strong>Comissão de Marketplace (B2B2C):</strong> % sobre contratos fechados.</li>
-                            <li><strong>SaaS para Distribuidoras/Comercializadoras (B2B):</strong> White-label da plataforma.</li>
-                        </ol>
-                    </SubSection>
-                    <SubSection title="Proposta para POC Equatorial (3 meses)">
-                        <p><strong>Investimento POC: R$ 180.000</strong></p>
-                        <p><strong>Entregáveis:</strong> Dashboard white-label, integração com 3 comercializadoras, 500 clientes piloto, relatório de ROI.</p>
-                        <p><strong>KPIs de Sucesso:</strong> Taxa de migração > 15%, NPS > 70, Redução custo médio > 10%.</p>
-                    </SubSection>
-                </Section>
+                                <PhaseCard 
+                                    phase="Fase 3" 
+                                    title="Validação e Teste em Ambiente Real (Piloto)" 
+                                    duration="3 Semanas" 
+                                    objective="Testar a solução em ambiente operacional, coletando métricas de desempenho."
+                                >
+                                    <DeliverableList items={[
+                                        { title: "Plano de Piloto Detalhado", description: "Escopo, métricas de sucesso e cronograma." },
+                                        { title: "Base de Dados de Resultados", description: "Dados brutos e processados do piloto." },
+                                        { title: "Relatório de Análise de Desempenho", description: "Quantificação dos ganhos de eficiência/redução de CO2." }
+                                    ]} />
+                                </PhaseCard>
 
-                <Section title="5. Call to Action">
-                    <SubSection title="Próximos Passos">
-                         <ul className="space-y-2">
-                            <BulletPoint>🚀 <strong>Imediato:</strong> Assinatura de NDA, definição de squad, Kick-off POC.</BulletPoint>
-                            <BulletPoint>🚀 <strong>Curto Prazo:</strong> Início desenvolvimento, seleção clientes piloto.</BulletPoint>
-                            <BulletPoint>🚀 <strong>Médio Prazo:</strong> Operação POC, medição de KPIs, decisão de escala.</BulletPoint>
-                        </ul>
+                                <PhaseCard 
+                                    phase="Fase 4" 
+                                    title="Resultados e Próximos Passos" 
+                                    duration="1 Semana" 
+                                    objective="Consolidar os resultados e definir a estratégia de escala/comercialização."
+                                >
+                                    <DeliverableList items={[
+                                        { title: "Relatório Final do Projeto", description: "Resumo executivo, metodologia e aprendizados." },
+                                        { title: "Proposta de Modelo de Negócio", description: "Plano de escala e comercialização." },
+                                        { title: "Apresentação Executiva (Pitch Deck)", description: "Material para Demoday e investidores." }
+                                    ]} />
+                                </PhaseCard>
+                            </div>
+                        </div>
                     </SubSection>
                 </Section>
 

@@ -4,7 +4,7 @@ import DashboardCard from '../../DashboardCard';
 import { ServerRackIcon } from './icons';
 import { NVIDIA_PLATFORMS, PLATFORM_DISTRIBUTION_DATA } from '../../data/nvidiaPlatforms';
 
-// FIX: The data for the chart was not correctly structured. This now uses the percentages from nvidiaPlatforms.ts.
+// The data for the chart was not correctly structured. This now uses the percentages from nvidiaPlatforms.ts.
 const data = [{ name: 'distribution', ...PLATFORM_DISTRIBUTION_DATA }];
 
 const CustomTooltip = ({ active, payload }: any) => {
@@ -46,7 +46,7 @@ const PlatformDistribution: React.FC = () => {
                         <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(42, 52, 73, 0.5)' }} />
                         <Legend iconType="circle" iconSize={8} wrapperStyle={{fontSize: "12px", paddingTop: "20px"}} />
                         {NVIDIA_PLATFORMS.map((platform, index) => {
-                            // FIX: The `radius` prop was incorrectly placed on a `Cell` component which caused a TypeScript error.
+                            // The `radius` prop was incorrectly placed on a `Cell` component which caused a TypeScript error.
                             // It has been moved to the `Bar` component. The logic below correctly rounds the outer corners
                             // of the entire stacked bar.
                             const isFirst = index === 0;
@@ -65,7 +65,7 @@ const PlatformDistribution: React.FC = () => {
                                     dataKey={platform.name} 
                                     stackId="a" 
                                     fill={platform.color}
-                                    background={{ fill: '#1A2233' }}
+                                    // FIX: The `radius` prop should be on the Bar, not the Cell.
                                     radius={radius}
                                 />
                             );

@@ -12,7 +12,11 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "recharts": "^3.4.1",
-    "@google/genai": "^1.29.0"
+    "@google/genai": "^1.29.0",
+    "@tensorflow/tfjs": "^4.20.0",
+    "luxon": "^3.4.4",
+    "openai": "^4.52.7",
+    "@anthropic-ai/sdk": "^0.22.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

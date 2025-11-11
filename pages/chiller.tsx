@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { ThermometerIcon, DropletIcon, CogIcon, TrendingUpIcon, ActivityIcon } from '../application/components/icons';
 
-// FIX: Add props interface for translation function
+// Add props interface for translation function
 interface ChillerDashboardProps {
 }
 
