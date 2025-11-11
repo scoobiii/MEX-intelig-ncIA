@@ -22,6 +22,7 @@ import ResourceManagement from '../application/components/ResourceManagement';
 import NuclearPlantInfo from '../application/components/NuclearPlantInfo';
 import NuclearProjectAnalysis from '../application/components/NuclearProjectAnalysis';
 import RenewablePlantInfo from '../application/components/RenewablePlantInfo';
+import SolarPanelTreeMap from '../application/components/SolarPanelTreeMap';
 
 // --- PROPS INTERFACE ---
 interface PowerPlantProps {
@@ -549,6 +550,12 @@ const PowerPlant: React.FC<PowerPlantProps> = ({
                 {isNuclear && (
                     <div className="col-span-12 mt-6">
                         <NuclearProjectAnalysis />
+                    </div>
+                )}
+
+                {fuelMode === FuelMode.SolarBess && (
+                    <div className="col-span-12">
+                        <SolarPanelTreeMap />
                     </div>
                 )}
             </div>
