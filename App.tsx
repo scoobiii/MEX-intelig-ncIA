@@ -295,6 +295,16 @@ const App: React.FC = () => {
     }
   }, [plantStatus, powerOutput, selectedPlant, efficiency]);
 
+  // Special case for full-screen pages
+  if (currentPage === 'Infrastructure') {
+    return (
+      <>
+        <Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
+        <Infrastructure />
+      </>
+    );
+  }
+
   const renderPage = () => {
     switch (currentPage) {
       case 'Power Plant':
@@ -322,8 +332,6 @@ const App: React.FC = () => {
         />;
       case 'Data Center':
         return <DataCenter onActiveRackUpdate={setActiveRackCount} />;
-      case 'Infrastructure':
-        return <Infrastructure />;
       case 'Financials':
         return <Financials 
           plantStatus={plantStatus}

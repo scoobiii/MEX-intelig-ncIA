@@ -166,7 +166,7 @@ const NationalInventory: React.FC = () => {
 
     const summaryStats = useMemo(() => {
         const totalPower = filteredPlants.reduce((sum, p) => sum + p.powerMW, 0);
-        // FIX: Cast the initial object of reduce to ensure correct type inference for `acc`.
+        // FIX: Cast the initial object of reduce to ensure correct type inference for `acc` and allow arithmetic operations.
         const statusCounts = filteredPlants.reduce((acc, p) => {
             acc[p.status] = (acc[p.status] || 0) + 1;
             return acc;
