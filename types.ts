@@ -139,3 +139,57 @@ export interface FundAsset {
   value: number; // Current value
   change24h: number;
 }
+
+// CVM / Real Estate Types
+export interface RealEstateAsset {
+  id: string;
+  name: string;
+  type: 'Logístico' | 'Lajes Corporativas' | 'Shopping' | 'Híbrido' | 'Renda Urbana' | 'Industrial';
+  address: string;
+  state: string;
+  city: string;
+  gla: number; // Gross Leasable Area in m²
+  vacancy: number; // Percentage
+  tenants: string[];
+  description?: string;
+  amenities?: string[];
+  transport?: string[];
+}
+
+export interface InvestmentFund {
+  ticker: string; // Or CNPJ for non-listed
+  cnpj: string;
+  name: string;
+  admin: string;
+  manager: string;
+  type: 'FII' | 'FIP' | 'FIA' | 'FIM'; // CVM Type
+  strategy: 'Logística' | 'Family Office' | 'Institucional' | 'Multiestratégia' | 'Papel' | 'Infraestrutura' | 'Shopping' | 'Híbrido' | 'Desenvolvimento';
+  audience: 'Geral' | 'Qualificado' | 'Profissional'; // CVM classification
+  netWorth: number; // Patrimônio Líquido
+  price?: number; // Market Price (if listed)
+  p_vp?: number; // Price / Net Asset Value
+  dy_12m?: number; // Dividend Yield 12 months
+  liquidityDaily?: number;
+  assets: RealEstateAsset[];
+  adminFee?: string; // New CVM field
+  startDate?: string; // New CVM field
+}
+
+// EWX Marketplace Types
+export interface GalaxySubscription {
+  id: string;
+  name: string;
+  description: string;
+  apy: number;
+  minStake: number;
+  participants: number;
+  status: 'Active' | 'Full';
+}
+
+export interface BridgeTransaction {
+  id: string;
+  type: 'LIFT' | 'LOWER'; // EWC -> EWX (Lift), EWX -> EWC (Lower)
+  amount: number;
+  status: 'Completed' | 'Pending' | 'Failed';
+  timestamp: string;
+}

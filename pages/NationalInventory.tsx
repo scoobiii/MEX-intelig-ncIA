@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, PieChart, Pie, Cell, CartesianGrid } from 'recharts';
 // FIX: Add all required icon imports with aliases to resolve "Cannot find name" errors.
@@ -104,7 +105,8 @@ const NationalInventory: React.FC = () => {
             return acc;
         }, {});
 
-        return Object.entries(fuelMap).map(([name, data]) => ({ name, ...data }));
+        // Explicitly typing data to avoid 'unknown' type error
+        return Object.entries(fuelMap).map(([name, data]: [string, { count: number; power: number }]) => ({ name, count: data.count, power: data.power }));
     }, [filteredPlants]);
     
     const powerByState = useMemo(() => {
@@ -115,7 +117,7 @@ const NationalInventory: React.FC = () => {
         
         return Object.entries(powerMap)
             .map(([uf, power]) => ({ uf, power }))
-            .sort((a, b) => b.power - a.power)
+            .sort((a, b) => Number(b.power) - Number(a.power))
             .slice(0, 10);
     }, [filteredPlants]);
 

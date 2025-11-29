@@ -30,7 +30,7 @@ const navItems: NavItem[] = [
     { label: 'Análise de Rede', page: 'Grid Analysis' },
     { label: 'Potencial Solar', page: 'Solar Potential' },
     { label: 'Open Energy', page: 'Open Energy' },
-    { label: 'Terminal Apex', page: 'EnerTradeZK' },
+    { label: 'MexPlace', page: 'EnerTradeZK' },
     { label: 'Status', page: 'Project Status' },
 ];
 
