@@ -75,7 +75,7 @@ const generateOHLCV = (points: number): OHLCV[] => {
 
 const mockOrderBook: OrderBookItem[] = Array.from({ length: 10 }).map((_, i) => ({
     price: 250 + (i * 2) * (Math.random() > 0.5 ? 1 : -1),
-    amount: Math.floor(Math.random() * 500),
+    amount: Math.floor(Math.random() * 500) + 50,
     total: 0,
     type: (Math.random() > 0.5 ? 'ask' : 'bid') as 'ask' | 'bid'
 })).sort((a, b) => b.price - a.price);
@@ -176,38 +176,134 @@ const FinancialChart: React.FC<{ data: OHLCV[], t: (k:string)=>string }> = ({ da
 const OrderBook: React.FC<{ orders: OrderBookItem[], t: (k:string)=>string }> = ({ orders, t }) => {
     const asks = orders.filter(o => o.type === 'ask').sort((a, b) => a.price - b.price).slice(0, 7).reverse();
     const bids = orders.filter(o => o.type === 'bid').sort((a, b) => b.price - a.price).slice(0, 7);
+    const maxVol = Math.max(...orders.map(o => o.amount * o.price));
 
     return (
-        <div className="text-xs font-mono">
-            <div className="grid grid-cols-3 text-gray-500 mb-2 px-2">
+        <div className="text-xs font-mono bg-gray-900 rounded p-2 border border-gray-700">
+            <div className="grid grid-cols-3 text-gray-500 mb-2 px-2 font-bold uppercase tracking-wider">
                 <span>{t('ewx.funds.price')} (R$)</span>
                 <span className="text-right">{t('orderbook.quant')}</span>
                 <span className="text-right">{t('orderbook.total')}</span>
             </div>
             <div className="space-y-0.5">
-                {asks.map((order, i) => (
-                    <div key={`ask-${i}`} className="grid grid-cols-3 px-2 py-1 hover:bg-gray-700/50 cursor-pointer relative">
-                        <span className="text-red-400">{order.price.toFixed(2)}</span>
-                        <span className="text-right text-gray-300">{order.amount}</span>
-                        <span className="text-right text-gray-400">{(order.price * order.amount).toLocaleString()}</span>
-                        <div className="absolute right-0 top-0 bottom-0 bg-red-500/10" style={{ width: `${Math.random() * 40}%` }}></div>
-                    </div>
-                ))}
-                <div className="py-2 border-y border-gray-700 my-1 text-center font-bold text-lg text-white">
-                    250.00 <span className="text-xs font-normal text-gray-400">R$/MWh</span>
+                {asks.map((order, i) => {
+                    const total = order.price * order.amount;
+                    const percent = (total / maxVol) * 100;
+                    return (
+                        <div key={`ask-${i}`} className="grid grid-cols-3 px-2 py-1 hover:bg-gray-800 cursor-pointer relative group">
+                            <span className="text-red-400 group-hover:text-red-300 font-bold z-10">{order.price.toFixed(2)}</span>
+                            <span className="text-right text-gray-300 z-10">{order.amount}</span>
+                            <span className="text-right text-gray-400 z-10">{total.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                            <div className="absolute right-0 top-0 bottom-0 bg-red-900/30 transition-all" style={{ width: `${percent}%` }}></div>
+                        </div>
+                    );
+                })}
+                
+                <div className="py-2 my-1 text-center font-bold text-lg text-white bg-gray-800 border-y border-gray-700 flex justify-between px-4 items-center">
+                    <span className="text-green-500 text-sm">Spread: 0.5%</span>
+                    <span>250.00 <span className="text-xs font-normal text-gray-400">R$/MWh</span></span>
+                    <span className="text-red-500 text-sm">Vol: 24h High</span>
                 </div>
-                {bids.map((order, i) => (
-                    <div key={`bid-${i}`} className="grid grid-cols-3 px-2 py-1 hover:bg-gray-700/50 cursor-pointer relative">
-                        <span className="text-green-400">{order.price.toFixed(2)}</span>
-                        <span className="text-right text-gray-300">{order.amount}</span>
-                        <span className="text-right text-gray-400">{(order.price * order.amount).toLocaleString()}</span>
-                        <div className="absolute right-0 top-0 bottom-0 bg-green-500/10" style={{ width: `${Math.random() * 40}%` }}></div>
-                    </div>
-                ))}
+
+                {bids.map((order, i) => {
+                    const total = order.price * order.amount;
+                    const percent = (total / maxVol) * 100;
+                    return (
+                        <div key={`bid-${i}`} className="grid grid-cols-3 px-2 py-1 hover:bg-gray-800 cursor-pointer relative group">
+                            <span className="text-green-400 group-hover:text-green-300 font-bold z-10">{order.price.toFixed(2)}</span>
+                            <span className="text-right text-gray-300 z-10">{order.amount}</span>
+                            <span className="text-right text-gray-400 z-10">{total.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                            <div className="absolute right-0 top-0 bottom-0 bg-green-900/30 transition-all" style={{ width: `${percent}%` }}></div>
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );
 };
+
+const EnergyTradeForm: React.FC<{ t: (k:string)=>string }> = ({ t }) => {
+    const [side, setSide] = useState<'BUY' | 'SELL'>('BUY');
+    const [orderType, setOrderType] = useState<'LIMIT' | 'MARKET'>('LIMIT');
+    const [price, setPrice] = useState('250.00');
+    const [amount, setAmount] = useState('100');
+
+    const total = parseFloat(price) * parseFloat(amount);
+
+    return (
+        <DashboardCard title={t('ewx.market.trade_title')} icon={<ArrowsRightLeftIcon className="w-6 h-6 text-cyan-400"/>} className="h-full">
+            <div className="flex flex-col h-full gap-4">
+                <div className="flex p-1 bg-gray-900 rounded-lg">
+                    <button 
+                        className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${side === 'BUY' ? 'bg-green-600 text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
+                        onClick={() => setSide('BUY')}
+                    >
+                        {t('ewx.market.buy')}
+                    </button>
+                    <button 
+                        className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${side === 'SELL' ? 'bg-red-600 text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
+                        onClick={() => setSide('SELL')}
+                    >
+                        {t('ewx.market.sell')}
+                    </button>
+                </div>
+
+                <div className="flex gap-2 text-xs">
+                    <button 
+                        className={`px-3 py-1 rounded border ${orderType === 'LIMIT' ? 'border-cyan-500 text-cyan-400' : 'border-gray-600 text-gray-400'}`}
+                        onClick={() => setOrderType('LIMIT')}
+                    >
+                        {t('ewx.market.limit_order')}
+                    </button>
+                    <button 
+                        className={`px-3 py-1 rounded border ${orderType === 'MARKET' ? 'border-cyan-500 text-cyan-400' : 'border-gray-600 text-gray-400'}`}
+                        onClick={() => setOrderType('MARKET')}
+                    >
+                        {t('ewx.market.market_order')}
+                    </button>
+                </div>
+
+                <div className="space-y-3">
+                    <div>
+                        <label className="text-xs text-gray-400 mb-1 block">{t('ewx.market.price_unit')}</label>
+                        <div className="relative">
+                            <input 
+                                type="number" 
+                                value={price} 
+                                onChange={e => setPrice(e.target.value)}
+                                disabled={orderType === 'MARKET'}
+                                className="w-full bg-gray-800 border border-gray-600 rounded p-2 text-right text-white font-mono focus:border-cyan-500 outline-none disabled:opacity-50"
+                            />
+                            <span className="absolute left-3 top-2 text-gray-500 text-xs">R$</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label className="text-xs text-gray-400 mb-1 block">{t('ewx.market.amount_mwh')}</label>
+                        <div className="relative">
+                            <input 
+                                type="number" 
+                                value={amount} 
+                                onChange={e => setAmount(e.target.value)}
+                                className="w-full bg-gray-800 border border-gray-600 rounded p-2 text-right text-white font-mono focus:border-cyan-500 outline-none"
+                            />
+                            <span className="absolute left-3 top-2 text-gray-500 text-xs">MWh</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mt-auto">
+                    <div className="flex justify-between text-sm mb-2">
+                        <span className="text-gray-400">{t('ewx.market.total_est')}</span>
+                        <span className="text-white font-bold">R$ {total.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                    </div>
+                    <button className={`w-full py-3 rounded font-bold text-white shadow-lg transition-all ${side === 'BUY' ? 'bg-green-600 hover:bg-green-500' : 'bg-red-600 hover:bg-red-500'}`}>
+                        {t('ewx.market.execute')} {side}
+                    </button>
+                </div>
+            </div>
+        </DashboardCard>
+    );
+}
 
 const IoTPlantMonitor: React.FC<{ t: (k:string)=>string }> = ({ t }) => {
     const [telemetry, setTelemetry] = useState<SmartMeterData>({
@@ -228,6 +324,7 @@ const IoTPlantMonitor: React.FC<{ t: (k:string)=>string }> = ({ t }) => {
                 voltageA: 13.8 + (Math.random() - 0.5) * 0.1,
                 voltageB: 13.8 + (Math.random() - 0.5) * 0.1,
                 frequency: 60.00 + (Math.random() - 0.5) * 0.05,
+                currentA: Math.max(200, 250 + (Math.random() - 0.5) * 10), // Dynamic current
                 activePower: Math.max(0, 7.5 + (Math.random() - 0.5) * 0.5),
                 thd: Math.max(0, 1.5 + (Math.random() - 0.5) * 0.2),
                 batterySoC: Math.max(0, Math.min(100, prev.batterySoC + (Math.random() > 0.5 ? -0.1 : 0.05))), // Slight discharge trend
@@ -239,14 +336,22 @@ const IoTPlantMonitor: React.FC<{ t: (k:string)=>string }> = ({ t }) => {
 
     return (
         <DashboardCard title={`${t('ewx.market.iot_monitor')} - GPA CD 01 BESS`} icon={<SignalIcon className="w-6 h-6 text-green-400" />}>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-2">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 p-2">
                 <div className="bg-gray-800 p-3 rounded-lg text-center border border-gray-700">
                     <p className="text-xs text-gray-400">Voltagem (kV)</p>
                     <p className="text-xl font-mono text-cyan-400">{telemetry.voltageA.toFixed(2)}</p>
                 </div>
                 <div className="bg-gray-800 p-3 rounded-lg text-center border border-gray-700">
+                    <p className="text-xs text-gray-400">Corrente (A)</p>
+                    <p className="text-xl font-mono text-yellow-400">{telemetry.currentA.toFixed(0)}</p>
+                </div>
+                <div className="bg-gray-800 p-3 rounded-lg text-center border border-gray-700">
                     <p className="text-xs text-gray-400">Frequência (Hz)</p>
                     <p className="text-xl font-mono text-purple-400">{telemetry.frequency.toFixed(2)}</p>
+                </div>
+                <div className="bg-gray-800 p-3 rounded-lg text-center border border-gray-700">
+                    <p className="text-xs text-gray-400">Potência (MW)</p>
+                    <p className="text-xl font-mono text-blue-400">{telemetry.activePower.toFixed(2)}</p>
                 </div>
                 <div className="bg-gray-800 p-3 rounded-lg text-center border border-gray-700">
                     <p className="text-xs text-gray-400">Qualidade (THD %)</p>
@@ -254,11 +359,11 @@ const IoTPlantMonitor: React.FC<{ t: (k:string)=>string }> = ({ t }) => {
                 </div>
                 <div className="bg-gray-800 p-3 rounded-lg text-center border border-gray-700">
                     <p className="text-xs text-gray-400">Bateria (SoC)</p>
-                    <div className="flex items-center justify-center gap-2">
+                    <div className="flex items-center justify-center gap-2 mt-1">
                         <div className="w-full bg-gray-700 rounded-full h-2">
                             <div className="bg-green-500 h-2 rounded-full" style={{width: `${telemetry.batterySoC}%`}}></div>
                         </div>
-                        <span className="text-sm font-bold text-white">{telemetry.batterySoC.toFixed(0)}%</span>
+                        <span className="text-xs font-bold text-white">{telemetry.batterySoC.toFixed(0)}%</span>
                     </div>
                 </div>
             </div>
@@ -492,39 +597,36 @@ const AssetRetrofitSimulator: React.FC<{ asset: RealEstateAsset; fund: Investmen
     const generatorsCount = 6;
     const totalDieselCapacity = 2500; // kVA (2.5 MW)
 
-    // 2. Solar Potential
-    const roofArea = asset.roofArea || 127435;
-    const usableRoofArea = roofArea * 0.45; // 45% usability
-    const panelPower = 550; // W
-    const panelArea = 2.5; // m²
-    const numberOfPanels = Math.floor(usableRoofArea / panelArea);
-    const solarCapacityMW = (numberOfPanels * panelPower) / 1000000; // ~ 28 MWp theoretically, let's cap realistically to 7.5 MWp AC
-    const realisticSolarCapacity = 7.5; // MWp
+    // GPA SPECIFIC DATA from Prompt
+    const annualConsumptionMWh = 19656.27;
+    const monthlyConsumptionMWh = annualConsumptionMWh / 12; // ~1638 MWh/month
+
+    // 2. Solar Potential - UPSCALED TO GENERATE SURPLUS FOR ODATA
+    // Standard roof was 7.5MWp. To sell to Odata, we assume use of adjacent land/parking carports to reach 12 MWp.
+    const realisticSolarCapacity = 12.0; // MWp (Enhanced Retrofit)
+    const solarGenerationMonthlyMWh = realisticSolarCapacity * 5 * 30; // 5 peak hours * 30 days = 1800 MWh
+    
+    const excessEnergyMWh = Math.max(0, solarGenerationMonthlyMWh - monthlyConsumptionMWh); // 1800 - 1638 = 162 MWh Surplus
 
     // 3. BESS Sizing
-    const bessCapacityMWh = 2; // 2 MWh
-    const bessPowerMW = 0.5; // 500 kW
+    const bessCapacityMWh = 4; // Upscaled for Odata support
+    const bessPowerMW = 1.0; 
 
     // 4. Financials
-    const capexUSD = 7500000;
+    const capexUSD = 12000000; // Increased due to larger scale
     const exchangeRate = 5.0;
-    const capexBRL = capexUSD * exchangeRate; // R$ 37.5M
+    const capexBRL = capexUSD * exchangeRate; // R$ 60M
     const quotaPrice = 100;
     const newQuotas = Math.ceil(capexBRL / quotaPrice);
 
-    // 5. Energy Economics
-    const gpaConsumptionMWm = 2.0; // Average consumption
-    const solarGenerationMonthlyMWh = realisticSolarCapacity * 5 * 30; // 5 peak hours * 30 days
-    const excessEnergyMWh = Math.max(0, solarGenerationMonthlyMWh - (gpaConsumptionMWm * 24 * 30));
-    
     // 6. Valuation
-    const billReduction = 0.10; // 10%
+    const billReduction = 0.15; // Higher reduction due to scale
     const currentCapRate = 0.085;
-    const newCapRate = 0.075; // Compressed due to ESG
+    const newCapRate = 0.075; 
     const valuationUplift = (fund.netWorth / newCapRate) - (fund.netWorth / currentCapRate);
 
-    // 7. Galaxy Rewards Calculation
-    const galaxyNodeEarningPerMWh = 15; // Example: 15 EWT per MWh of green energy processed/validated
+    // 7. Galaxy Rewards
+    const galaxyNodeEarningPerMWh = 15; 
     const estimatedGalaxyRewards = excessEnergyMWh * galaxyNodeEarningPerMWh;
 
     return (
@@ -554,6 +656,7 @@ const AssetRetrofitSimulator: React.FC<{ asset: RealEstateAsset; fund: Investmen
                                 <p className="text-sm text-gray-400">{t('retrofit.current')}</p>
                                 <p className="text-xl font-bold text-white">{generatorsCount}x Geradores Diesel</p>
                                 <p className="text-xs text-red-300">{t('retrofit.capacity_polluting')}: {totalDieselCapacity} kVA</p>
+                                <p className="text-xs text-gray-400 mt-1">Consumo Atual (Eletropaulo): <strong>{monthlyConsumptionMWh.toFixed(0)} MWh/mês</strong></p>
                             </div>
                         </div>
 
@@ -563,9 +666,9 @@ const AssetRetrofitSimulator: React.FC<{ asset: RealEstateAsset; fund: Investmen
                             <div className="flex items-center gap-4">
                                 <div className="bg-green-900/50 p-3 rounded-full"><BoltIcon className="w-6 h-6 text-green-400" /></div>
                                 <div>
-                                    <p className="text-sm text-gray-400">{t('retrofit.new_solar')}</p>
+                                    <p className="text-sm text-gray-400">{t('retrofit.new_solar')} (Telhado + Carports)</p>
                                     <p className="text-xl font-bold text-white">{realisticSolarCapacity} MWp</p>
-                                    <p className="text-xs text-green-300">{t('retrofit.roof_area')}: 127.435 m²</p>
+                                    <p className="text-xs text-green-300">Geração Estimada: {solarGenerationMonthlyMWh} MWh/mês</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-4 border-t border-green-800/30 pt-3">
@@ -573,7 +676,7 @@ const AssetRetrofitSimulator: React.FC<{ asset: RealEstateAsset; fund: Investmen
                                 <div>
                                     <p className="text-sm text-gray-400">{t('retrofit.storage')}</p>
                                     <p className="text-xl font-bold text-white">{bessCapacityMWh} MWh</p>
-                                    <p className="text-xs text-green-300">{t('retrofit.bess_desc')} (500 kW)</p>
+                                    <p className="text-xs text-green-300">{t('retrofit.bess_desc')} (1 MW)</p>
                                 </div>
                             </div>
                         </div>
@@ -608,7 +711,7 @@ const AssetRetrofitSimulator: React.FC<{ asset: RealEstateAsset; fund: Investmen
                             <h4 className="font-bold text-white mb-3">{t('retrofit.tenant_benefits')} (GPA)</h4>
                             <div className="flex justify-between items-center mb-2">
                                 <span className="text-gray-400 text-sm">{t('retrofit.bill_reduction')}</span>
-                                <span className="text-green-400 font-bold">10% Off</span>
+                                <span className="text-green-400 font-bold">15% Off</span>
                             </div>
                             <div className="flex justify-between items-center">
                                 <span className="text-gray-400 text-sm">{t('retrofit.quota_acquisition')}</span>
@@ -616,25 +719,29 @@ const AssetRetrofitSimulator: React.FC<{ asset: RealEstateAsset; fund: Investmen
                             </div>
                         </div>
 
-                        <div className="bg-gradient-to-r from-purple-900/30 to-blue-900/30 p-4 rounded-lg border border-purple-500/30">
-                            <h4 className="font-bold text-white mb-3 flex items-center gap-2">
-                                <GlobeAltIcon className="w-5 h-5 text-purple-400" /> {t('retrofit.tokenization')}
-                            </h4>
-                            <div className="flex flex-col gap-3">
-                                <div className="flex justify-between items-end">
-                                    <div>
-                                        <p className="text-3xl font-bold text-white">{excessEnergyMWh.toFixed(0)} <span className="text-sm text-gray-400 font-normal">MWh/mês</span></p>
-                                        <p className="text-xs text-purple-300 mt-1">{t('retrofit.available_acl')}</p>
+                        <div className="bg-gradient-to-r from-purple-900/30 to-blue-900/30 p-4 rounded-lg border border-purple-500/30 relative overflow-hidden">
+                            <div className="relative z-10">
+                                <h4 className="font-bold text-white mb-3 flex items-center gap-2">
+                                    <GlobeAltIcon className="w-5 h-5 text-purple-400" /> {t('retrofit.tokenization')} - P2P Sales
+                                </h4>
+                                <div className="flex flex-col gap-3">
+                                    <div className="flex justify-between items-end">
+                                        <div>
+                                            <p className="text-sm text-gray-300">Venda para Vizinho:</p>
+                                            <p className="text-3xl font-bold text-cyan-400">ODATA <span className="text-sm text-white font-normal">(Data Center)</span></p>
+                                            <p className="text-xs text-purple-300 mt-1">{t('retrofit.available_acl')}: <strong>{excessEnergyMWh.toFixed(0)} MWh/mês</strong></p>
+                                        </div>
+                                        <button className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-bold shadow-lg transition">
+                                            {t('retrofit.sell_tokens')}
+                                        </button>
                                     </div>
-                                    <button className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-bold shadow-lg transition">
-                                        {t('retrofit.sell_tokens')}
+                                    <button className="w-full bg-cyan-800 hover:bg-cyan-700 text-cyan-100 py-2 rounded text-xs font-bold transition flex items-center justify-center gap-2">
+                                        <CheckCircleIcon className="w-4 h-4" />
+                                        {t('retrofit.register_free_market')}
                                     </button>
                                 </div>
-                                <button className="w-full bg-cyan-800 hover:bg-cyan-700 text-cyan-100 py-2 rounded text-xs font-bold transition flex items-center justify-center gap-2">
-                                    <CheckCircleIcon className="w-4 h-4" />
-                                    {t('retrofit.register_free_market')}
-                                </button>
                             </div>
+                            <ServerRackIcon className="absolute -right-4 -bottom-4 w-32 h-32 text-gray-700 opacity-20 rotate-12" />
                         </div>
                         
                         <div className="text-center pt-2">
@@ -871,12 +978,9 @@ export default function MainDashboard() {
                     </div>
                 </div>
                 <div className="col-span-12 lg:col-span-4 space-y-4">
+                    <EnergyTradeForm t={t} />
                     <DashboardCard title={t('ewx.market.orderBook')} icon={<ArrowsRightLeftIcon className="w-5 h-5 text-gray-400"/>}>
                         <OrderBook orders={mockOrderBook} t={t} />
-                        <div className="flex gap-2 mt-4">
-                            <button className="flex-1 bg-green-600 py-2 rounded text-white font-bold">{t('ewx.market.buy')}</button>
-                            <button className="flex-1 bg-red-600 py-2 rounded text-white font-bold">{t('ewx.market.sell')}</button>
-                        </div>
                     </DashboardCard>
                 </div>
             </>
@@ -886,25 +990,44 @@ export default function MainDashboard() {
             <div className="col-span-12 h-[85vh]">
                 <DashboardCard title={t('ewx.funds.title')} icon={<FactoryIcon className="w-5 h-5 text-cyan-400"/>} className="h-full">
                     <div className="h-full flex flex-col gap-4">
-                        <div className="flex gap-4 mb-2 p-2 bg-gray-800 rounded-lg">
-                            <div className="relative flex-grow">
+                        <div className="flex gap-4 items-center bg-gray-800 p-2 rounded-lg mb-2">
+                            <div className="flex-1">
+                                <p className="text-xs text-gray-400">{t('ewx.funds.my_portfolio')}</p>
+                                <div className="flex gap-6 mt-1">
+                                    <div><p className="text-xs text-gray-500">{t('ewx.funds.equity')}</p><p className="font-bold text-white">R$ 1.5M</p></div>
+                                    <div><p className="text-xs text-gray-500">{t('ewx.funds.daily_pnl')}</p><p className="font-bold text-green-400">+ R$ 12.5k</p></div>
+                                </div>
+                            </div>
+                            <div className="relative flex-grow max-w-md">
                                 <MagnifyingGlassIcon className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
                                 <input type="text" placeholder={t('ewx.funds.search')} className="w-full bg-gray-700 border border-gray-600 rounded-lg pl-10 pr-4 py-2 text-sm text-white" />
                             </div>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 overflow-y-auto pb-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 overflow-y-auto pb-4 pr-1">
                             {FUNDS_CVM_DATA.map(fund => (
-                                <div key={fund.ticker} className="bg-gray-800 border border-gray-700 rounded-lg p-4 hover:border-cyan-500 transition-all flex flex-col">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <h3 className="font-bold text-white text-lg">{fund.ticker}</h3>
-                                        <span className="px-2 py-0.5 bg-gray-700 rounded text-xs text-gray-300">{fund.strategy}</span>
+                                <div key={fund.ticker} className="bg-gray-800 border border-gray-700 rounded-lg p-4 hover:border-cyan-500 transition-all flex flex-col relative group">
+                                    <div className="absolute top-4 right-4 text-gray-600 group-hover:text-cyan-500"><TrendingUpIcon className="w-5 h-5"/></div>
+                                    <div className="mb-3">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <h3 className="font-bold text-white text-xl">{fund.ticker}</h3>
+                                            <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wide ${fund.strategy === 'Logística' ? 'bg-blue-900 text-blue-300' : fund.strategy === 'Híbrido' ? 'bg-purple-900 text-purple-300' : 'bg-gray-700 text-gray-300'}`}>{fund.strategy}</span>
+                                        </div>
+                                        <p className="text-xs text-gray-400 h-8 line-clamp-2">{fund.name}</p>
                                     </div>
-                                    <p className="text-sm text-gray-400 mb-4 h-10 line-clamp-2">{fund.name}</p>
-                                    <div className="grid grid-cols-2 gap-2 text-sm mb-4">
-                                        <div><p className="text-gray-500">{t('ewx.funds.price')}</p><p className="font-mono text-white">R$ {fund.price?.toFixed(2)}</p></div>
-                                        <div><p className="text-gray-500">{t('ewx.funds.dy')}</p><p className="font-mono text-green-400">{fund.dy_12m}%</p></div>
-                                        <div><p className="text-gray-500">{t('ewx.funds.pvp')}</p><p className="font-mono text-white">{fund.p_vp}</p></div>
-                                        <div><p className="text-gray-500">{t('ewx.funds.liq')}</p><p className="font-mono text-white">{(fund.liquidityDaily || 0 / 1000).toFixed(0)}k</p></div>
+                                    
+                                    <div className="grid grid-cols-3 gap-2 text-xs mb-4 bg-gray-900/50 p-2 rounded-md">
+                                        <div className="text-center border-r border-gray-700">
+                                            <p className="text-gray-500">{t('ewx.funds.price')}</p>
+                                            <p className="font-mono text-white font-bold">R${fund.price?.toFixed(2)}</p>
+                                        </div>
+                                        <div className="text-center border-r border-gray-700">
+                                            <p className="text-gray-500">{t('ewx.funds.dy')}</p>
+                                            <p className="font-mono text-green-400 font-bold">{fund.dy_12m}%</p>
+                                        </div>
+                                        <div className="text-center">
+                                            <p className="text-gray-500">{t('ewx.funds.pvp')}</p>
+                                            <p className="font-mono text-white font-bold">{fund.p_vp}</p>
+                                        </div>
                                     </div>
                                     <FundCardActions fund={fund} />
                                 </div>
