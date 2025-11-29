@@ -154,6 +154,12 @@ export interface RealEstateAsset {
   description?: string;
   amenities?: string[];
   transport?: string[];
+  // Energy Retrofit Fields
+  energyInfrastructure?: {
+    generators: string[]; // e.g., "4x 500kVA"
+    totalBackupCapacity: number; // kVA
+  };
+  roofArea?: number; // m² available for solar
 }
 
 export interface InvestmentFund {
@@ -191,5 +197,18 @@ export interface BridgeTransaction {
   type: 'LIFT' | 'LOWER'; // EWC -> EWX (Lift), EWX -> EWC (Lower)
   amount: number;
   status: 'Completed' | 'Pending' | 'Failed';
+  timestamp: string;
+}
+
+export interface SmartMeterData {
+  plantId: string;
+  voltageA: number; // Volts
+  voltageB: number;
+  voltageC: number;
+  currentA: number; // Amps
+  frequency: number; // Hz
+  activePower: number; // kW
+  thd: number; // Total Harmonic Distortion %
+  batterySoC: number; // %
   timestamp: string;
 }

@@ -14,9 +14,11 @@ import {
   InfoIcon,
   TrendingUpIcon,
   ChartBarIcon,
-  ServerRackIcon
+  ServerRackIcon,
+  CloseIcon,
+  SignalIcon
 } from '../application/components/icons';
-import { OHLCV, OrderBookItem, FundAsset, InvestmentFund, RealEstateAsset, GalaxySubscription, BridgeTransaction } from '../types';
+import { OHLCV, OrderBookItem, FundAsset, InvestmentFund, RealEstateAsset, GalaxySubscription, BridgeTransaction, SmartMeterData } from '../types';
 import DashboardCard from '../DashboardCard';
 import LanguageSwitcher from '../application/components/LanguageSwitcher';
 import { useSettings } from '../hooks/useSettings';
@@ -93,21 +95,57 @@ const GALAXY_SUBSCRIPTIONS: GalaxySubscription[] = [
     { id: '3', name: 'Carbon Credit Oracle', description: 'Data feed for carbon offset verification.', apy: 8.5, minStake: 500, participants: 800, status: 'Full' },
 ];
 
-// Reusing existing CVM data from previous prompts
+// UPDATED DATA WITH CD 01 (GPA) DETAILS
 const LOGISTIC_ASSETS_MOCK: RealEstateAsset[] = [
-    { id: '1', name: 'CD 01 - Osasco (Triple A)', type: 'Logístico', address: 'Rodovia Anhanguera, Km 17,8', state: 'SP', city: 'Osasco', gla: 127435, vacancy: 0, tenants: ['Grande Varejista'], description: 'Centro de distribuição Triple A monousuário.', amenities: ['Restaurante', 'Ambulatório'], transport: ['Rodoanel', 'Marginal Tietê'] },
+    { 
+        id: '1', 
+        name: 'CD 01 - GPA Osasco (Triple A)', 
+        type: 'Logístico', 
+        address: 'Rodovia Anhanguera, Km 17,8', 
+        state: 'SP', 
+        city: 'Osasco', 
+        gla: 127435, 
+        vacancy: 0, 
+        tenants: ['Grupo Pão de Açúcar (GPA)'], 
+        description: 'Centro de distribuição Triple A monousuário. Pé-direito de 12m, piso 6 ton/m². Localização estratégica a 6,5km da Marginal Tietê. Certificação LEED Gold.', 
+        amenities: ['Restaurante', 'Ambulatório', 'Segurança Armada 24h', 'Sala de Reuniões'], 
+        transport: ['Rodoanel Mário Covas (6.5km)', 'Marginal Tietê (6.8km)', 'Centro SP (22km)'],
+        energyInfrastructure: {
+            generators: ['4x 500kVA', '2x 250kVA'],
+            totalBackupCapacity: 2500 // kVA
+        },
+        roofArea: 127435 // m² total built area, assuming roof approx same
+    },
     { id: '2', name: 'HGLG Itupeva', type: 'Logístico', address: 'Rod. Vice-Prefeito Hermenegildo Tonoli', state: 'SP', city: 'Itupeva', gla: 85000, vacancy: 2.5, tenants: ['Volkswagen', 'DHL'] },
 ];
 
+// UPDATED FUND DATA FOR BZL11
 const FUNDS_CVM_DATA: InvestmentFund[] = [
     { ticker: 'HGLG11', cnpj: '11.111.111/0001-11', name: 'CSHG Logística', admin: 'Credit Suisse', manager: 'CSHG', type: 'FII', strategy: 'Logística', audience: 'Geral', netWorth: 5200000000, price: 165.50, p_vp: 1.05, dy_12m: 9.2, liquidityDaily: 8000000, assets: [LOGISTIC_ASSETS_MOCK[1]], startDate: '06/06/2010', adminFee: '0,6% a.a.' },
     { ticker: 'APEX11', cnpj: '55.555.555/0001-55', name: 'Apex Institucional FII', admin: 'ApexGroup', manager: 'Apex Capital', type: 'FII', strategy: 'Institucional', audience: 'Profissional', netWorth: 500000000, price: 1000.00, p_vp: 0.95, dy_12m: 12.5, liquidityDaily: 500000, assets: [], startDate: '20/02/2022', adminFee: '0,5% a.a.' },
-    { ticker: 'BZEL11', cnpj: '35.507.610/0001-60', name: 'Barzel CD1 FII', admin: 'Vórtx', manager: 'Barzel Properties', type: 'FII', strategy: 'Híbrido', audience: 'Profissional', netWorth: 850000000, price: 100.00, p_vp: 1.0, dy_12m: 8.8, liquidityDaily: 0, assets: [LOGISTIC_ASSETS_MOCK[0]], startDate: '21/01/2020', adminFee: 'N/A' },
+    { 
+        ticker: 'BZL11', // Updated Ticker
+        cnpj: '42.869.869/0001-17', 
+        name: 'BARZEL SP FII', // Updated Name
+        admin: 'Ouribank', // Updated Admin
+        manager: 'Barzel Properties', 
+        type: 'FII', 
+        strategy: 'Híbrido', 
+        audience: 'Profissional', 
+        netWorth: 850000000, 
+        price: 100.00, 
+        p_vp: 1.0, 
+        dy_12m: 8.8, 
+        liquidityDaily: 250000, 
+        assets: [LOGISTIC_ASSETS_MOCK[0]], 
+        startDate: '21/01/2025', 
+        adminFee: 'N/A' 
+    },
 ];
 
 // ==================== SUB-COMPONENTS ====================
 
-const FinancialChart: React.FC<{ data: OHLCV[] }> = ({ data }) => {
+const FinancialChart: React.FC<{ data: OHLCV[], t: (k:string)=>string }> = ({ data, t }) => {
     return (
         <ResponsiveContainer width="100%" height={400}>
             <ComposedChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
@@ -127,9 +165,9 @@ const FinancialChart: React.FC<{ data: OHLCV[] }> = ({ data }) => {
                     labelStyle={{ color: '#9ca3af', marginBottom: '5px' }}
                 />
                 <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
-                <Area yAxisId="left" type="monotone" dataKey="close" name="Preço (MEX-kWh)" stroke="#06b6d4" fill="url(#colorPrice)" strokeWidth={2} />
+                <Area yAxisId="left" type="monotone" dataKey="close" name={t('chart.price')} stroke="#06b6d4" fill="url(#colorPrice)" strokeWidth={2} />
                 <Line yAxisId="left" type="monotone" dataKey="ema7" name="EMA 7" stroke="#fbbf24" strokeWidth={1} dot={false} />
-                <Bar yAxisId="right" dataKey="volume" name="Volume" fill="#374151" opacity={0.5} barSize={10} />
+                <Bar yAxisId="right" dataKey="volume" name={t('chart.volume')} fill="#374151" opacity={0.5} barSize={10} />
             </ComposedChart>
         </ResponsiveContainer>
     );
@@ -143,8 +181,8 @@ const OrderBook: React.FC<{ orders: OrderBookItem[], t: (k:string)=>string }> = 
         <div className="text-xs font-mono">
             <div className="grid grid-cols-3 text-gray-500 mb-2 px-2">
                 <span>{t('ewx.funds.price')} (R$)</span>
-                <span className="text-right">Quant (MWh)</span>
-                <span className="text-right">Total</span>
+                <span className="text-right">{t('orderbook.quant')}</span>
+                <span className="text-right">{t('orderbook.total')}</span>
             </div>
             <div className="space-y-0.5">
                 {asks.map((order, i) => (
@@ -170,6 +208,67 @@ const OrderBook: React.FC<{ orders: OrderBookItem[], t: (k:string)=>string }> = 
         </div>
     );
 };
+
+const IoTPlantMonitor: React.FC<{ t: (k:string)=>string }> = ({ t }) => {
+    const [telemetry, setTelemetry] = useState<SmartMeterData>({
+        plantId: 'GPA CD 01 BESS',
+        voltageA: 13.8, voltageB: 13.8, voltageC: 13.75,
+        currentA: 250,
+        frequency: 60.00,
+        activePower: 7.5, // MW
+        thd: 1.5,
+        batterySoC: 85,
+        timestamp: new Date().toISOString()
+    });
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setTelemetry(prev => ({
+                ...prev,
+                voltageA: 13.8 + (Math.random() - 0.5) * 0.1,
+                voltageB: 13.8 + (Math.random() - 0.5) * 0.1,
+                frequency: 60.00 + (Math.random() - 0.5) * 0.05,
+                activePower: Math.max(0, 7.5 + (Math.random() - 0.5) * 0.5),
+                thd: Math.max(0, 1.5 + (Math.random() - 0.5) * 0.2),
+                batterySoC: Math.max(0, Math.min(100, prev.batterySoC + (Math.random() > 0.5 ? -0.1 : 0.05))), // Slight discharge trend
+                timestamp: new Date().toISOString()
+            }));
+        }, 2000);
+        return () => clearInterval(interval);
+    }, []);
+
+    return (
+        <DashboardCard title={`${t('ewx.market.iot_monitor')} - GPA CD 01 BESS`} icon={<SignalIcon className="w-6 h-6 text-green-400" />}>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-2">
+                <div className="bg-gray-800 p-3 rounded-lg text-center border border-gray-700">
+                    <p className="text-xs text-gray-400">Voltagem (kV)</p>
+                    <p className="text-xl font-mono text-cyan-400">{telemetry.voltageA.toFixed(2)}</p>
+                </div>
+                <div className="bg-gray-800 p-3 rounded-lg text-center border border-gray-700">
+                    <p className="text-xs text-gray-400">Frequência (Hz)</p>
+                    <p className="text-xl font-mono text-purple-400">{telemetry.frequency.toFixed(2)}</p>
+                </div>
+                <div className="bg-gray-800 p-3 rounded-lg text-center border border-gray-700">
+                    <p className="text-xs text-gray-400">Qualidade (THD %)</p>
+                    <p className={`text-xl font-mono ${telemetry.thd > 5 ? 'text-red-400' : 'text-green-400'}`}>{telemetry.thd.toFixed(1)}%</p>
+                </div>
+                <div className="bg-gray-800 p-3 rounded-lg text-center border border-gray-700">
+                    <p className="text-xs text-gray-400">Bateria (SoC)</p>
+                    <div className="flex items-center justify-center gap-2">
+                        <div className="w-full bg-gray-700 rounded-full h-2">
+                            <div className="bg-green-500 h-2 rounded-full" style={{width: `${telemetry.batterySoC}%`}}></div>
+                        </div>
+                        <span className="text-sm font-bold text-white">{telemetry.batterySoC.toFixed(0)}%</span>
+                    </div>
+                </div>
+            </div>
+            <div className="mt-2 text-center text-xs text-gray-500 flex justify-between px-4">
+                <span>ID: {telemetry.plantId}</span>
+                <span>Last Update: {new Date(telemetry.timestamp).toLocaleTimeString()}</span>
+            </div>
+        </DashboardCard>
+    );
+}
 
 const GalaxySubscriptionsView: React.FC<{ subscriptions: GalaxySubscription[], t: (k:string)=>string }> = ({ subscriptions, t }) => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -212,9 +311,29 @@ const GalaxySubscriptionsView: React.FC<{ subscriptions: GalaxySubscription[], t
     </div>
 );
 
-const EWTBridge: React.FC<{ t: (k:string)=>string }> = ({ t }) => {
+const EWTBridge: React.FC<{ t: (k:string)=>string, balance: number }> = ({ t, balance }) => {
     const [direction, setDirection] = useState<'Lift' | 'Lower'>('Lift');
     const [amount, setAmount] = useState('');
+    const [error, setError] = useState<string | null>(null);
+
+    const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = e.target.value;
+        setAmount(val);
+        const numVal = parseFloat(val);
+
+        if (val === '') {
+            setError(null);
+            return;
+        }
+
+        if (isNaN(numVal) || numVal <= 0) {
+            setError(t('ewx.bridge.invalidAmount'));
+        } else if (numVal > balance) {
+            setError(t('ewx.bridge.insufficientBalance'));
+        } else {
+            setError(null);
+        }
+    };
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
@@ -245,16 +364,20 @@ const EWTBridge: React.FC<{ t: (k:string)=>string }> = ({ t }) => {
                             <input 
                                 type="number" 
                                 value={amount}
-                                onChange={e => setAmount(e.target.value)}
-                                className="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-white text-lg focus:ring-2 focus:ring-cyan-500 outline-none"
+                                onChange={handleAmountChange}
+                                className={`w-full bg-gray-900 border rounded-lg p-3 text-white text-lg focus:ring-2 focus:ring-cyan-500 outline-none ${error ? 'border-red-500 focus:ring-red-500' : 'border-gray-700'}`}
                                 placeholder="0.00"
                             />
                             <span className="absolute right-4 top-3.5 text-gray-500 font-bold">EWT</span>
                         </div>
-                        <p className="text-xs text-right mt-2 text-gray-500">{t('ewx.bridge.balance')}: 1,250.00 EWT</p>
+                        {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+                        <p className="text-xs text-right mt-2 text-gray-500">{t('ewx.bridge.balance')}: {balance.toFixed(2)} EWT</p>
                     </div>
 
-                    <button className="w-full py-4 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-bold rounded-lg shadow-xl transition-all">
+                    <button 
+                        disabled={!!error || !amount}
+                        className="w-full py-4 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 disabled:from-gray-700 disabled:to-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed text-white font-bold rounded-lg shadow-xl transition-all"
+                    >
                         {direction === 'Lift' ? t('ewx.bridge.lift') : t('ewx.bridge.lower')}
                     </button>
                 </div>
@@ -361,6 +484,170 @@ const EWXInstallationDocs: React.FC<{ t: (k:string)=>string }> = ({ t }) => {
     );
 };
 
+// ==================== NEW ASSET RETROFIT SIMULATOR ====================
+
+const AssetRetrofitSimulator: React.FC<{ asset: RealEstateAsset; fund: InvestmentFund; onClose: () => void; t: (k:string)=>string }> = ({ asset, fund, onClose, t }) => {
+    // Technical Calculations
+    // 1. Current Infrastructure Removal
+    const generatorsCount = 6;
+    const totalDieselCapacity = 2500; // kVA (2.5 MW)
+
+    // 2. Solar Potential
+    const roofArea = asset.roofArea || 127435;
+    const usableRoofArea = roofArea * 0.45; // 45% usability
+    const panelPower = 550; // W
+    const panelArea = 2.5; // m²
+    const numberOfPanels = Math.floor(usableRoofArea / panelArea);
+    const solarCapacityMW = (numberOfPanels * panelPower) / 1000000; // ~ 28 MWp theoretically, let's cap realistically to 7.5 MWp AC
+    const realisticSolarCapacity = 7.5; // MWp
+
+    // 3. BESS Sizing
+    const bessCapacityMWh = 2; // 2 MWh
+    const bessPowerMW = 0.5; // 500 kW
+
+    // 4. Financials
+    const capexUSD = 7500000;
+    const exchangeRate = 5.0;
+    const capexBRL = capexUSD * exchangeRate; // R$ 37.5M
+    const quotaPrice = 100;
+    const newQuotas = Math.ceil(capexBRL / quotaPrice);
+
+    // 5. Energy Economics
+    const gpaConsumptionMWm = 2.0; // Average consumption
+    const solarGenerationMonthlyMWh = realisticSolarCapacity * 5 * 30; // 5 peak hours * 30 days
+    const excessEnergyMWh = Math.max(0, solarGenerationMonthlyMWh - (gpaConsumptionMWm * 24 * 30));
+    
+    // 6. Valuation
+    const billReduction = 0.10; // 10%
+    const currentCapRate = 0.085;
+    const newCapRate = 0.075; // Compressed due to ESG
+    const valuationUplift = (fund.netWorth / newCapRate) - (fund.netWorth / currentCapRate);
+
+    // 7. Galaxy Rewards Calculation
+    const galaxyNodeEarningPerMWh = 15; // Example: 15 EWT per MWh of green energy processed/validated
+    const estimatedGalaxyRewards = excessEnergyMWh * galaxyNodeEarningPerMWh;
+
+    return (
+        <div className="fixed inset-0 bg-gray-900/90 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
+            <div className="bg-gray-800 w-full max-w-6xl rounded-xl border border-gray-700 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+                <div className="p-6 border-b border-gray-700 flex justify-between items-start bg-gradient-to-r from-gray-800 to-gray-900">
+                    <div>
+                        <div className="flex items-center gap-3">
+                            <BoltIcon className="w-8 h-8 text-yellow-400" />
+                            <h2 className="text-2xl font-bold text-white">{t('retrofit.title')}</h2>
+                        </div>
+                        <p className="text-gray-400 mt-1">{t('retrofit.transform')} <strong className="text-white">{asset.name}</strong></p>
+                    </div>
+                    <button onClick={onClose} className="p-2 hover:bg-gray-700 rounded-full text-gray-400 hover:text-white transition">
+                        <CloseIcon className="w-6 h-6" />
+                    </button>
+                </div>
+
+                <div className="p-6 overflow-y-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* LEFT COLUMN: Technical Transformation */}
+                    <div className="space-y-6">
+                        <h3 className="text-lg font-bold text-cyan-400 border-b border-gray-700 pb-2">{t('retrofit.section1')}</h3>
+                        
+                        <div className="bg-red-900/20 border border-red-800/50 p-4 rounded-lg flex items-center gap-4">
+                            <div className="bg-red-900/50 p-3 rounded-full"><ServerRackIcon className="w-6 h-6 text-red-400" /></div>
+                            <div>
+                                <p className="text-sm text-gray-400">{t('retrofit.current')}</p>
+                                <p className="text-xl font-bold text-white">{generatorsCount}x Geradores Diesel</p>
+                                <p className="text-xs text-red-300">{t('retrofit.capacity_polluting')}: {totalDieselCapacity} kVA</p>
+                            </div>
+                        </div>
+
+                        <div className="flex justify-center text-gray-500"><ArrowsRightLeftIcon className="w-6 h-6 rotate-90" /></div>
+
+                        <div className="bg-green-900/20 border border-green-800/50 p-4 rounded-lg space-y-4">
+                            <div className="flex items-center gap-4">
+                                <div className="bg-green-900/50 p-3 rounded-full"><BoltIcon className="w-6 h-6 text-green-400" /></div>
+                                <div>
+                                    <p className="text-sm text-gray-400">{t('retrofit.new_solar')}</p>
+                                    <p className="text-xl font-bold text-white">{realisticSolarCapacity} MWp</p>
+                                    <p className="text-xs text-green-300">{t('retrofit.roof_area')}: 127.435 m²</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-4 border-t border-green-800/30 pt-3">
+                                <div className="bg-green-900/50 p-3 rounded-full"><CubeTransparentIcon className="w-6 h-6 text-green-400" /></div>
+                                <div>
+                                    <p className="text-sm text-gray-400">{t('retrofit.storage')}</p>
+                                    <p className="text-xl font-bold text-white">{bessCapacityMWh} MWh</p>
+                                    <p className="text-xs text-green-300">{t('retrofit.bess_desc')} (500 kW)</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-purple-900/20 border border-purple-800/50 p-4 rounded-lg flex items-center gap-4">
+                            <div className="bg-purple-900/50 p-3 rounded-full"><GlobeAltIcon className="w-6 h-6 text-purple-400" /></div>
+                            <div>
+                                <p className="text-sm text-gray-400">{t('retrofit.galaxy_integration')}</p>
+                                <p className="text-xl font-bold text-white">Green Proofs Worker Nodes</p>
+                                <p className="text-xs text-purple-300">{t('retrofit.galaxy_rewards')}: ~{estimatedGalaxyRewards.toFixed(0)} EWT/mês</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* RIGHT COLUMN: Financial Engineering */}
+                    <div className="space-y-6">
+                        <h3 className="text-lg font-bold text-purple-400 border-b border-gray-700 pb-2">{t('retrofit.section2')}</h3>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="bg-gray-700/50 p-4 rounded-lg">
+                                <p className="text-gray-400 text-xs">{t('retrofit.capex')}</p>
+                                <p className="text-2xl font-bold text-white">R$ {(capexBRL/1000000).toFixed(1)}M</p>
+                            </div>
+                            <div className="bg-gray-700/50 p-4 rounded-lg">
+                                <p className="text-gray-400 text-xs">{t('retrofit.quotas')}</p>
+                                <p className="text-2xl font-bold text-cyan-400">{newQuotas.toLocaleString()}</p>
+                                <p className="text-xs text-gray-500">@ R$ {quotaPrice},00</p>
+                            </div>
+                        </div>
+
+                        <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
+                            <h4 className="font-bold text-white mb-3">{t('retrofit.tenant_benefits')} (GPA)</h4>
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="text-gray-400 text-sm">{t('retrofit.bill_reduction')}</span>
+                                <span className="text-green-400 font-bold">10% Off</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-gray-400 text-sm">{t('retrofit.quota_acquisition')}</span>
+                                <span className="text-white font-bold">Hedge Inflacionário</span>
+                            </div>
+                        </div>
+
+                        <div className="bg-gradient-to-r from-purple-900/30 to-blue-900/30 p-4 rounded-lg border border-purple-500/30">
+                            <h4 className="font-bold text-white mb-3 flex items-center gap-2">
+                                <GlobeAltIcon className="w-5 h-5 text-purple-400" /> {t('retrofit.tokenization')}
+                            </h4>
+                            <div className="flex flex-col gap-3">
+                                <div className="flex justify-between items-end">
+                                    <div>
+                                        <p className="text-3xl font-bold text-white">{excessEnergyMWh.toFixed(0)} <span className="text-sm text-gray-400 font-normal">MWh/mês</span></p>
+                                        <p className="text-xs text-purple-300 mt-1">{t('retrofit.available_acl')}</p>
+                                    </div>
+                                    <button className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-bold shadow-lg transition">
+                                        {t('retrofit.sell_tokens')}
+                                    </button>
+                                </div>
+                                <button className="w-full bg-cyan-800 hover:bg-cyan-700 text-cyan-100 py-2 rounded text-xs font-bold transition flex items-center justify-center gap-2">
+                                    <CheckCircleIcon className="w-4 h-4" />
+                                    {t('retrofit.register_free_market')}
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div className="text-center pt-2">
+                            <p className="text-xs text-gray-500">{t('retrofit.valuation')}</p>
+                            <p className="text-xl font-bold text-green-500">+ R$ {(valuationUplift/1000000).toFixed(1)} Milhões</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 // ==================== MAIN DASHBOARD ====================
 
 export default function MainDashboard() {
@@ -368,6 +655,8 @@ export default function MainDashboard() {
   const [chartData, setChartData] = useState<OHLCV[]>([]);
   const [activeTab, setActiveTab] = useState<'ENERGY' | 'FUNDS' | 'BRIDGE' | 'GALAXY' | 'DOCS'>('GALAXY');
   const [walletBalance, setWalletBalance] = useState({ EWT: 1250.00, MEX: 5000.00, BRL: 150000.00 });
+  const [selectedFundForRetrofit, setSelectedFundForRetrofit] = useState<{fund: InvestmentFund, asset: RealEstateAsset} | null>(null);
+  
   const { language, setLanguage } = useSettings();
   const { t } = useTranslations(language);
 
@@ -411,25 +700,37 @@ export default function MainDashboard() {
   };
 
   const FundCardActions: React.FC<{ fund: InvestmentFund }> = ({ fund }) => (
-      <div className="flex gap-2 mt-4 pt-4 border-t border-gray-700">
-          <button 
-            className="flex-1 bg-green-600 hover:bg-green-500 text-white py-2 rounded text-sm font-bold transition shadow-lg shadow-green-900/20"
-            onClick={() => {
-                alert(`${t('ewx.funds.buying')} ${fund.ticker}...`);
-                setWalletBalance(prev => ({...prev, BRL: prev.BRL - (fund.price || 0) * 10}));
-            }}
-          >
-              {t('ewx.market.buy')}
-          </button>
-          <button 
-            className="flex-1 bg-red-600 hover:bg-red-500 text-white py-2 rounded text-sm font-bold transition shadow-lg shadow-red-900/20"
-            onClick={() => {
-                alert(`${t('ewx.funds.selling')} ${fund.ticker}...`);
-                setWalletBalance(prev => ({...prev, BRL: prev.BRL + (fund.price || 0) * 10}));
-            }}
-          >
-              {t('ewx.market.sell')}
-          </button>
+      <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-gray-700">
+          <div className="flex gap-2">
+            <button 
+                className="flex-1 bg-green-600 hover:bg-green-500 text-white py-2 rounded text-sm font-bold transition shadow-lg shadow-green-900/20"
+                onClick={() => {
+                    alert(`${t('ewx.funds.buying')} ${fund.ticker}...`);
+                    setWalletBalance(prev => ({...prev, BRL: prev.BRL - (fund.price || 0) * 10}));
+                }}
+            >
+                {t('ewx.market.buy')}
+            </button>
+            <button 
+                className="flex-1 bg-red-600 hover:bg-red-500 text-white py-2 rounded text-sm font-bold transition shadow-lg shadow-red-900/20"
+                onClick={() => {
+                    alert(`${t('ewx.funds.selling')} ${fund.ticker}...`);
+                    setWalletBalance(prev => ({...prev, BRL: prev.BRL + (fund.price || 0) * 10}));
+                }}
+            >
+                {t('ewx.market.sell')}
+            </button>
+          </div>
+          {/* Retrofit Button specific for Barzel Fund */}
+          {fund.ticker === 'BZL11' && fund.assets.length > 0 && (
+              <button 
+                className="w-full bg-cyan-600 hover:bg-cyan-500 text-white py-2 rounded text-sm font-bold transition shadow-lg flex items-center justify-center gap-2 mt-2"
+                onClick={() => setSelectedFundForRetrofit({ fund, asset: fund.assets[0] })}
+              >
+                  <BoltIcon className="w-4 h-4" />
+                  {t('ewx.funds.develop_retrofit')}
+              </button>
+          )}
       </div>
   );
 
@@ -441,7 +742,7 @@ export default function MainDashboard() {
         <div className="flex gap-6 font-mono">
             <span className="flex items-center gap-1 text-purple-400">EWT <strong className="text-white">$ 2.45 (+1.2%)</strong></span>
             <span className="flex items-center gap-1 text-cyan-400">MEX <strong className="text-white">R$ 250.00 (+0.8%)</strong></span>
-            <span className="flex items-center gap-1 text-green-400">HGLG11 <strong className="text-white">R$ 165.50 (+0.3%)</strong></span>
+            <span className="flex items-center gap-1 text-green-400">BZL11 <strong className="text-white">R$ 100.00 (+5.4%)</strong></span>
         </div>
         <div className="flex items-center gap-4">
             <span className="text-gray-400">Wallet: <span className="text-white font-bold">{walletBalance.EWT.toFixed(2)} EWT</span> | <span className="text-white font-bold">R$ {walletBalance.BRL.toLocaleString()}</span></span>
@@ -521,7 +822,7 @@ export default function MainDashboard() {
 
         {activeTab === 'BRIDGE' && (
             <div className="col-span-12">
-                <EWTBridge t={t} />
+                <EWTBridge t={t} balance={walletBalance.EWT} />
             </div>
         )}
 
@@ -534,8 +835,13 @@ export default function MainDashboard() {
         {activeTab === 'ENERGY' && (
             <>
                 <div className="col-span-12 lg:col-span-8 space-y-4">
+                    {/* NEW IoT Monitor */}
+                    <div className="col-span-12">
+                        <IoTPlantMonitor t={t} />
+                    </div>
+
                     <DashboardCard title={`Energy Market (MEX-kWh / BRL)`} icon={<TrendingUpIcon className="w-5 h-5 text-gray-400"/>} className="min-h-[450px]">
-                        <FinancialChart data={chartData} />
+                        <FinancialChart data={chartData} t={t} />
                     </DashboardCard>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <DashboardCard title={t('ewx.market.walletAlloc')} icon={<CubeTransparentIcon className="w-5 h-5 text-purple-400"/>}>
@@ -610,6 +916,16 @@ export default function MainDashboard() {
         )}
 
       </main>
+
+      {/* RENDER MODAL IF SELECTED */}
+      {selectedFundForRetrofit && (
+          <AssetRetrofitSimulator 
+            asset={selectedFundForRetrofit.asset} 
+            fund={selectedFundForRetrofit.fund}
+            onClose={() => setSelectedFundForRetrofit(null)}
+            t={t}
+          />
+      )}
     </div>
   );
 }

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { GlobeAltIcon, ChevronDownIcon } from './icons';
 
@@ -9,13 +10,10 @@ interface Language {
 const languages: Language[] = [
   { code: 'PT', name: 'Português' },
   { code: 'EN', name: 'English' },
-  { code: 'AR', name: 'العربية' },
-  { code: 'ZH', name: '中文' },
-  { code: 'JA', name: '日本語' },
-  { code: 'DE', name: 'Deutsch' },
-  { code: 'AF', name: 'Afrikaans' },
-  { code: 'HI', name: 'हिन्दी' },
-  { code: 'TPI', name: 'Tupi-Guarani' },
+  { code: 'ZH', name: '简体中文' }, // Chinese (Simplified)
+  { code: 'AR', name: 'العربية' },   // Arabic
+  { code: 'FR', name: 'Français' },  // French
+  { code: 'IT', name: 'Italiano' },  // Italian
 ];
 
 interface LanguageSwitcherProps {
@@ -68,7 +66,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ language, setLangua
                   className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white flex items-center justify-between"
                   role="menuitem"
                 >
-                  <span>{lang.name}</span>
+                  <span className={lang.code === 'AR' ? 'font-arabic' : ''}>{lang.name}</span>
                   {lang.code === language && <span className="text-cyan-400">✓</span>}
                 </button>
               </li>
