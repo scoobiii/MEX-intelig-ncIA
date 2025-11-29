@@ -99,7 +99,7 @@ const GALAXY_SUBSCRIPTIONS: GalaxySubscription[] = [
 const LOGISTIC_ASSETS_MOCK: RealEstateAsset[] = [
     { 
         id: '1', 
-        name: 'CD 01 - GPA Osasco (Triple A)', 
+        name: 'BZL11 CD01 - Osasco (Triple A)', 
         type: 'Logístico', 
         address: 'Rodovia Anhanguera, Km 17,8', 
         state: 'SP', 
@@ -107,27 +107,30 @@ const LOGISTIC_ASSETS_MOCK: RealEstateAsset[] = [
         gla: 127435, 
         vacancy: 0, 
         tenants: ['Grupo Pão de Açúcar (GPA)'], 
-        description: 'Centro de distribuição Triple A monousuário. Pé-direito de 12m, piso 6 ton/m². Localização estratégica a 6,5km da Marginal Tietê. Certificação LEED Gold.', 
-        amenities: ['Restaurante', 'Ambulatório', 'Segurança Armada 24h', 'Sala de Reuniões'], 
-        transport: ['Rodoanel Mário Covas (6.5km)', 'Marginal Tietê (6.8km)', 'Centro SP (22km)'],
+        description: 'Centro de distribuição Triple A monousuário localizado na divisa entre Osasco e São Paulo. Ocupado por um dos maiores varejistas do país.', 
+        amenities: ['Restaurante', 'Refeitório', 'Ambulatório', 'Sala de Reuniões', 'Área de Convivência', 'Balança'], 
+        transport: ['Marginal Tietê (6.8km)', 'Rodoanel Mario Covas (6.5km)', 'Centro de São Paulo (22km)'],
+        ceilingHeight: 12,
+        floorCapacity: 6,
+        parkingSpots: { trucks: 216, cars: 756 },
+        security: 'Controle de acesso, Clausura, CFTV com monitoramento externo',
         energyInfrastructure: {
             generators: ['4x 500kVA', '2x 250kVA'],
             totalBackupCapacity: 2500 // kVA
         },
-        roofArea: 127435 // m² total built area, assuming roof approx same
+        roofArea: 92265 // Approximate roof area based on built blocks
     },
     { id: '2', name: 'HGLG Itupeva', type: 'Logístico', address: 'Rod. Vice-Prefeito Hermenegildo Tonoli', state: 'SP', city: 'Itupeva', gla: 85000, vacancy: 2.5, tenants: ['Volkswagen', 'DHL'] },
 ];
 
-// UPDATED FUND DATA FOR BZL11
+// COMPREHENSIVE CVM & B3 DATA SIMULATION
 const FUNDS_CVM_DATA: InvestmentFund[] = [
-    { ticker: 'HGLG11', cnpj: '11.111.111/0001-11', name: 'CSHG Logística', admin: 'Credit Suisse', manager: 'CSHG', type: 'FII', strategy: 'Logística', audience: 'Geral', netWorth: 5200000000, price: 165.50, p_vp: 1.05, dy_12m: 9.2, liquidityDaily: 8000000, assets: [LOGISTIC_ASSETS_MOCK[1]], startDate: '06/06/2010', adminFee: '0,6% a.a.' },
-    { ticker: 'APEX11', cnpj: '55.555.555/0001-55', name: 'Apex Institucional FII', admin: 'ApexGroup', manager: 'Apex Capital', type: 'FII', strategy: 'Institucional', audience: 'Profissional', netWorth: 500000000, price: 1000.00, p_vp: 0.95, dy_12m: 12.5, liquidityDaily: 500000, assets: [], startDate: '20/02/2022', adminFee: '0,5% a.a.' },
+    // FIIs (Real Estate)
     { 
-        ticker: 'BZL11', // Updated Ticker
-        cnpj: '42.869.869/0001-17', 
-        name: 'BARZEL SP FII', // Updated Name
-        admin: 'Ouribank', // Updated Admin
+        ticker: 'BZL11', 
+        cnpj: '35.507.610/0001-60', 
+        name: 'BARZEL CD1 FII', 
+        admin: 'Vórtx', 
         manager: 'Barzel Properties', 
         type: 'FII', 
         strategy: 'Híbrido', 
@@ -138,9 +141,319 @@ const FUNDS_CVM_DATA: InvestmentFund[] = [
         dy_12m: 8.8, 
         liquidityDaily: 250000, 
         assets: [LOGISTIC_ASSETS_MOCK[0]], 
-        startDate: '21/01/2025', 
+        startDate: '21/01/2020', 
         adminFee: 'N/A' 
     },
+    { 
+        ticker: 'HGLG11', 
+        cnpj: '11.111.111/0001-11', 
+        name: 'CSHG Logística FII', 
+        admin: 'Credit Suisse', 
+        manager: 'CSHG', 
+        type: 'FII', 
+        strategy: 'Logística', 
+        audience: 'Geral', 
+        netWorth: 5200000000, 
+        price: 165.50, 
+        p_vp: 1.05, 
+        dy_12m: 9.2, 
+        liquidityDaily: 8000000, 
+        assets: [LOGISTIC_ASSETS_MOCK[1]], 
+        startDate: '06/06/2010', 
+        adminFee: '0,6% a.a.' 
+    },
+    { 
+        ticker: 'KNRI11', 
+        cnpj: '12.005.956/0001-65', 
+        name: 'Kinea Renda Imobiliária', 
+        admin: 'Intrag', 
+        manager: 'Kinea', 
+        type: 'FII', 
+        strategy: 'Híbrido', 
+        audience: 'Geral', 
+        netWorth: 3800000000, 
+        price: 158.20, 
+        p_vp: 1.01, 
+        dy_12m: 8.5, 
+        liquidityDaily: 4500000, 
+        assets: [], 
+        startDate: '10/08/2010', 
+        adminFee: '1,25% a.a.' 
+    },
+    { 
+        ticker: 'MXRF11', 
+        cnpj: '15.578.417/0001-03', 
+        name: 'Maxi Renda FII', 
+        admin: 'BTG Pactual', 
+        manager: 'XP Vista', 
+        type: 'FII', 
+        strategy: 'Papel', 
+        audience: 'Geral', 
+        netWorth: 2500000000, 
+        price: 10.55, 
+        p_vp: 1.08, 
+        dy_12m: 12.8, 
+        liquidityDaily: 12000000, 
+        assets: [], 
+        startDate: '13/04/2012', 
+        adminFee: '0,90% a.a.' 
+    },
+    { 
+        ticker: 'XPML11', 
+        cnpj: '28.757.546/0001-00', 
+        name: 'XP Malls FII', 
+        admin: 'XP Investimentos', 
+        manager: 'XP Vista', 
+        type: 'FII', 
+        strategy: 'Shopping', 
+        audience: 'Geral', 
+        netWorth: 3100000000, 
+        price: 112.40, 
+        p_vp: 1.02, 
+        dy_12m: 9.1, 
+        liquidityDaily: 6000000, 
+        assets: [], 
+        startDate: '18/12/2017', 
+        adminFee: '0,55% a.a.' 
+    },
+    { 
+        ticker: 'BTLG11', 
+        cnpj: '11.839.593/0001-09', 
+        name: 'BTG Pactual Logística', 
+        admin: 'BTG Pactual', 
+        manager: 'BTG Pactual', 
+        type: 'FII', 
+        strategy: 'Logística', 
+        audience: 'Geral', 
+        netWorth: 2800000000, 
+        price: 102.30, 
+        p_vp: 1.00, 
+        dy_12m: 9.4, 
+        liquidityDaily: 5500000, 
+        assets: [], 
+        startDate: '25/08/2010', 
+        adminFee: '0,90% a.a.' 
+    },
+    { 
+        ticker: 'VISC11', 
+        cnpj: '17.554.274/0001-25', 
+        name: 'Vinci Shopping Centers', 
+        admin: 'BRL Trust', 
+        manager: 'Vinci Partners', 
+        type: 'FII', 
+        strategy: 'Shopping', 
+        audience: 'Geral', 
+        netWorth: 2200000000, 
+        price: 118.90, 
+        p_vp: 1.04, 
+        dy_12m: 8.9, 
+        liquidityDaily: 3500000, 
+        assets: [], 
+        startDate: '27/02/2014', 
+        adminFee: '1,35% a.a.' 
+    },
+    { 
+        ticker: 'APEX11', 
+        cnpj: '55.555.555/0001-55', 
+        name: 'Apex Institucional FII', 
+        admin: 'ApexGroup', 
+        manager: 'Apex Capital', 
+        type: 'FII', 
+        strategy: 'Institucional', 
+        audience: 'Profissional', 
+        netWorth: 500000000, 
+        price: 1000.00, 
+        p_vp: 0.95, 
+        dy_12m: 12.5, 
+        liquidityDaily: 500000, 
+        assets: [], 
+        startDate: '20/02/2022', 
+        adminFee: '0,5% a.a.' 
+    },
+    { 
+        ticker: 'KNCR11', 
+        cnpj: '15.223.498/0001-09', 
+        name: 'Kinea Rendimentos Imobiliários', 
+        admin: 'Intrag', 
+        manager: 'Kinea', 
+        type: 'FII', 
+        strategy: 'Papel', 
+        audience: 'Geral', 
+        netWorth: 5700000000, 
+        price: 103.50, 
+        p_vp: 1.03, 
+        dy_12m: 11.2, 
+        liquidityDaily: 9000000, 
+        assets: [], 
+        startDate: '12/11/2012', 
+        adminFee: '1,00% a.a.' 
+    },
+    { 
+        ticker: 'XPLG11', 
+        cnpj: '26.502.794/0001-85', 
+        name: 'XP Logística FII', 
+        admin: 'Vórtx', 
+        manager: 'XP Vista', 
+        type: 'FII', 
+        strategy: 'Logística', 
+        audience: 'Geral', 
+        netWorth: 3100000000, 
+        price: 108.10, 
+        p_vp: 0.98, 
+        dy_12m: 9.0, 
+        liquidityDaily: 4800000, 
+        assets: [], 
+        startDate: '08/06/2018', 
+        adminFee: '0,75% a.a.' 
+    },
+    { 
+        ticker: 'BCFF11', 
+        cnpj: '11.026.627/0001-38', 
+        name: 'BTG Pactual Fundo de Fundos', 
+        admin: 'BTG Pactual', 
+        manager: 'BTG Pactual', 
+        type: 'FII', 
+        strategy: 'Multiestratégia', 
+        audience: 'Geral', 
+        netWorth: 1900000000, 
+        price: 72.50, 
+        p_vp: 0.92, 
+        dy_12m: 9.8, 
+        liquidityDaily: 3200000, 
+        assets: [], 
+        startDate: '23/06/2010', 
+        adminFee: '1,10% a.a.' 
+    },
+    // FIM (Multimercado)
+    {
+        ticker: 'VERDE',
+        cnpj: '02.398.924/0001-24',
+        name: 'Verde AM FIC FIM',
+        admin: 'Intrag',
+        manager: 'Verde Asset',
+        type: 'FIM',
+        strategy: 'Multiestratégia',
+        audience: 'Qualificado',
+        netWorth: 22000000000,
+        price: 100000, // Quota fictícia alta para FIM
+        p_vp: 1.0,
+        dy_12m: 0, // FIM acumula
+        liquidityDaily: 0, // D+60
+        assets: [],
+        startDate: '01/01/1997',
+        adminFee: '2,0% a.a. + 20% perf'
+    },
+    {
+        ticker: 'SPX NIM',
+        cnpj: '12.722.956/0001-38',
+        name: 'SPX Nimitz FIC FIM',
+        admin: 'BNY Mellon',
+        manager: 'SPX Capital',
+        type: 'FIM',
+        strategy: 'Macro',
+        audience: 'Qualificado',
+        netWorth: 15000000000,
+        price: 50000,
+        p_vp: 1.0,
+        dy_12m: 0,
+        liquidityDaily: 0,
+        assets: [],
+        startDate: '30/11/2010',
+        adminFee: '2,0% a.a. + 20% perf'
+    },
+    // FIA (Ações)
+    {
+        ticker: 'DYNAMO',
+        cnpj: '73.232.530/0001-67',
+        name: 'Dynamo Cougar FIA',
+        admin: 'BNY Mellon',
+        manager: 'Dynamo',
+        type: 'FIA',
+        strategy: 'Ações Livre',
+        audience: 'Qualificado',
+        netWorth: 5000000000,
+        price: 850000,
+        p_vp: 1.0,
+        dy_12m: 0,
+        liquidityDaily: 0,
+        assets: [],
+        startDate: '01/09/1993',
+        adminFee: '2,0% a.a.'
+    },
+    {
+        ticker: 'ALASKA',
+        cnpj: '26.648.868/0001-96',
+        name: 'Alaska Black FIA',
+        admin: 'BTG Pactual',
+        manager: 'Alaska Asset',
+        type: 'FIA',
+        strategy: 'Ações Livre',
+        audience: 'Geral',
+        netWorth: 2000000000,
+        price: 150,
+        p_vp: 1.0,
+        dy_12m: 0,
+        liquidityDaily: 1000000,
+        assets: [],
+        startDate: '02/01/2017',
+        adminFee: '2,0% a.a. + 20% perf'
+    },
+    // RF (Renda Fixa)
+    {
+        ticker: 'SPARTA',
+        cnpj: '14.188.162/0001-00',
+        name: 'Sparta Top FIC FIRF CP',
+        admin: 'BNY Mellon',
+        manager: 'Sparta',
+        type: 'FIM', // Often RF strategies are wrapped in FIM legal structure, but strategy is Credit
+        strategy: 'Crédito Privado',
+        audience: 'Geral',
+        netWorth: 5500000000,
+        price: 100,
+        p_vp: 1.0,
+        dy_12m: 0,
+        liquidityDaily: 5000000,
+        assets: [],
+        startDate: '10/10/2011',
+        adminFee: '0,80% a.a.'
+    },
+    {
+        ticker: 'ARX',
+        cnpj: '05.158.762/0001-38',
+        name: 'ARX Denali FIC FIRF',
+        admin: 'BNY Mellon',
+        manager: 'ARX Investimentos',
+        type: 'FIM',
+        strategy: 'Crédito Privado',
+        audience: 'Qualificado',
+        netWorth: 3000000000,
+        price: 1000,
+        p_vp: 1.0,
+        dy_12m: 0,
+        liquidityDaily: 1000000,
+        assets: [],
+        startDate: '20/09/2002',
+        adminFee: '0,60% a.a.'
+    },
+    // FIP (Infra)
+    { 
+        ticker: 'JURO11', 
+        cnpj: '38.423.823/0001-90', 
+        name: 'Sparta Infra CD', 
+        admin: 'BTG Pactual', 
+        manager: 'Sparta', 
+        type: 'FIP', 
+        strategy: 'Infraestrutura', 
+        audience: 'Qualificado', 
+        netWorth: 1200000000, 
+        price: 105.20, 
+        p_vp: 1.05, 
+        dy_12m: 13.5, 
+        liquidityDaily: 2800000, 
+        assets: [], 
+        startDate: '15/09/2020', 
+        adminFee: '1,00% a.a.' 
+    }
 ];
 
 // ==================== SUB-COMPONENTS ====================
@@ -307,7 +620,7 @@ const EnergyTradeForm: React.FC<{ t: (k:string)=>string }> = ({ t }) => {
 
 const IoTPlantMonitor: React.FC<{ t: (k:string)=>string }> = ({ t }) => {
     const [telemetry, setTelemetry] = useState<SmartMeterData>({
-        plantId: 'GPA CD 01 BESS',
+        plantId: 'BZL11 CD01 BESS',
         voltageA: 13.8, voltageB: 13.8, voltageC: 13.75,
         currentA: 250,
         frequency: 60.00,
@@ -335,7 +648,7 @@ const IoTPlantMonitor: React.FC<{ t: (k:string)=>string }> = ({ t }) => {
     }, []);
 
     return (
-        <DashboardCard title={`${t('ewx.market.iot_monitor')} - GPA CD 01 BESS`} icon={<SignalIcon className="w-6 h-6 text-green-400" />}>
+        <DashboardCard title={`${t('ewx.market.iot_monitor')} - BZL11 CD01 BESS`} icon={<SignalIcon className="w-6 h-6 text-green-400" />}>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 p-2">
                 <div className="bg-gray-800 p-3 rounded-lg text-center border border-gray-700">
                     <p className="text-xs text-gray-400">Voltagem (kV)</p>
@@ -755,6 +1068,111 @@ const AssetRetrofitSimulator: React.FC<{ asset: RealEstateAsset; fund: Investmen
     );
 };
 
+// ==================== ASSET DETAIL MODAL ====================
+
+const AssetDetailModal: React.FC<{ asset: RealEstateAsset; onClose: () => void }> = ({ asset, onClose }) => {
+    return (
+        <div className="fixed inset-0 bg-gray-900/90 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
+            <div className="bg-gray-800 w-full max-w-4xl rounded-xl border border-gray-700 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+                <div className="p-6 border-b border-gray-700 flex justify-between items-start bg-gradient-to-r from-gray-800 to-gray-900">
+                    <div>
+                        <div className="flex items-center gap-3">
+                            <FactoryIcon className="w-8 h-8 text-cyan-400" />
+                            <h2 className="text-2xl font-bold text-white">{asset.name}</h2>
+                        </div>
+                        <p className="text-gray-400 mt-1">{asset.address} - {asset.city}/{asset.state}</p>
+                    </div>
+                    <button onClick={onClose} className="p-2 hover:bg-gray-700 rounded-full text-gray-400 hover:text-white transition">
+                        <CloseIcon className="w-6 h-6" />
+                    </button>
+                </div>
+
+                <div className="p-6 overflow-y-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {/* Left Column: Description & Gallery */}
+                        <div className="space-y-6">
+                            <div className="bg-gray-700 h-48 rounded-lg flex items-center justify-center text-gray-500">
+                                {/* Placeholder for Image */}
+                                <span className="text-sm">Galeria de Imagens (Placeholder)</span>
+                            </div>
+                            
+                            <div>
+                                <h3 className="text-lg font-semibold text-white mb-2">Descrição</h3>
+                                <p className="text-sm text-gray-300 leading-relaxed">
+                                    {asset.description || "Descrição não disponível."}
+                                </p>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="bg-gray-700/50 p-3 rounded-lg">
+                                    <p className="text-xs text-gray-400">Área Locável (GLA)</p>
+                                    <p className="text-lg font-bold text-white">{asset.gla.toLocaleString()} m²</p>
+                                </div>
+                                <div className="bg-gray-700/50 p-3 rounded-lg">
+                                    <p className="text-xs text-gray-400">Vacância</p>
+                                    <p className="text-lg font-bold text-white">{asset.vacancy}%</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right Column: Specs */}
+                        <div className="space-y-6">
+                            <div>
+                                <h3 className="text-lg font-semibold text-cyan-400 mb-3 border-b border-gray-700 pb-1">Especificações Técnicas</h3>
+                                <ul className="space-y-3 text-sm text-gray-300">
+                                    <li className="flex justify-between">
+                                        <span>Pé-direito livre:</span>
+                                        <strong className="text-white">{asset.ceilingHeight || 'N/A'} m</strong>
+                                    </li>
+                                    <li className="flex justify-between">
+                                        <span>Capacidade do piso:</span>
+                                        <strong className="text-white">{asset.floorCapacity || 'N/A'} ton/m²</strong>
+                                    </li>
+                                    <li className="flex justify-between">
+                                        <span>Vagas Caminhões:</span>
+                                        <strong className="text-white">{asset.parkingSpots?.trucks || 'N/A'}</strong>
+                                    </li>
+                                    <li className="flex justify-between">
+                                        <span>Vagas Carros:</span>
+                                        <strong className="text-white">{asset.parkingSpots?.cars || 'N/A'}</strong>
+                                    </li>
+                                    <li className="flex justify-between">
+                                        <span>Segurança:</span>
+                                        <strong className="text-white text-right max-w-[200px] truncate" title={asset.security}>{asset.security || 'N/A'}</strong>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <h3 className="text-lg font-semibold text-cyan-400 mb-3 border-b border-gray-700 pb-1">Amenidades</h3>
+                                <div className="flex flex-wrap gap-2">
+                                    {asset.amenities && asset.amenities.length > 0 ? asset.amenities.map((amenity, idx) => (
+                                        <span key={idx} className="px-3 py-1 bg-gray-700 rounded-full text-xs text-gray-200">
+                                            {amenity}
+                                        </span>
+                                    )) : <span className="text-gray-500 text-sm">Nenhuma informada.</span>}
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 className="text-lg font-semibold text-cyan-400 mb-3 border-b border-gray-700 pb-1">Transportes & Acessos</h3>
+                                <ul className="space-y-2 text-sm text-gray-300">
+                                    {asset.transport && asset.transport.length > 0 ? asset.transport.map((item, idx) => (
+                                        <li key={idx} className="flex items-start gap-2">
+                                            <MapPinIcon className="w-4 h-4 text-gray-500 mt-0.5" />
+                                            <span>{item}</span>
+                                        </li>
+                                    )) : <li className="text-gray-500">Nenhum informado.</li>}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 // ==================== MAIN DASHBOARD ====================
 
 export default function MainDashboard() {
@@ -763,6 +1181,9 @@ export default function MainDashboard() {
   const [activeTab, setActiveTab] = useState<'ENERGY' | 'FUNDS' | 'BRIDGE' | 'GALAXY' | 'DOCS'>('GALAXY');
   const [walletBalance, setWalletBalance] = useState({ EWT: 1250.00, MEX: 5000.00, BRL: 150000.00 });
   const [selectedFundForRetrofit, setSelectedFundForRetrofit] = useState<{fund: InvestmentFund, asset: RealEstateAsset} | null>(null);
+  const [selectedAssetDetail, setSelectedAssetDetail] = useState<RealEstateAsset | null>(null);
+  const [funds, setFunds] = useState<InvestmentFund[]>(FUNDS_CVM_DATA);
+  const [fundFilter, setFundFilter] = useState('Todos'); // New Filter State
   
   const { language, setLanguage } = useSettings();
   const { t } = useTranslations(language);
@@ -791,6 +1212,17 @@ export default function MainDashboard() {
     }, 3000);
 
     return () => clearInterval(interval);
+  }, []);
+
+  // Simulate CVM Data Refresh
+  useEffect(() => {
+      // In a real scenario, this would be a fetch call to an API proxy
+      const loadCVMData = async () => {
+          // Simulate latency
+          await new Promise(resolve => setTimeout(resolve, 800));
+          setFunds(FUNDS_CVM_DATA);
+      };
+      loadCVMData();
   }, []);
 
   const handleConnectWallet = async () => {
@@ -840,6 +1272,16 @@ export default function MainDashboard() {
           )}
       </div>
   );
+
+  const filteredFunds = funds.filter(fund => {
+      if (fundFilter === 'Todos') return true;
+      if (fundFilter === 'FIIs') return fund.type === 'FII';
+      if (fundFilter === 'Ações') return fund.type === 'FIA';
+      if (fundFilter === 'Multimercado') return fund.type === 'FIM' && fund.strategy !== 'Crédito Privado';
+      if (fundFilter === 'Renda Fixa') return fund.strategy === 'Crédito Privado'; // Using strategy for simplified RF mapping
+      if (fundFilter === 'FIP') return fund.type === 'FIP';
+      return true;
+  });
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-200 font-sans selection:bg-cyan-500/30">
@@ -990,44 +1432,99 @@ export default function MainDashboard() {
             <div className="col-span-12 h-[85vh]">
                 <DashboardCard title={t('ewx.funds.title')} icon={<FactoryIcon className="w-5 h-5 text-cyan-400"/>} className="h-full">
                     <div className="h-full flex flex-col gap-4">
-                        <div className="flex gap-4 items-center bg-gray-800 p-2 rounded-lg mb-2">
-                            <div className="flex-1">
+                        <div className="flex flex-col md:flex-row gap-4 items-center bg-gray-800 p-2 rounded-lg mb-2">
+                            <div className="flex-1 w-full">
                                 <p className="text-xs text-gray-400">{t('ewx.funds.my_portfolio')}</p>
                                 <div className="flex gap-6 mt-1">
                                     <div><p className="text-xs text-gray-500">{t('ewx.funds.equity')}</p><p className="font-bold text-white">R$ 1.5M</p></div>
                                     <div><p className="text-xs text-gray-500">{t('ewx.funds.daily_pnl')}</p><p className="font-bold text-green-400">+ R$ 12.5k</p></div>
                                 </div>
                             </div>
-                            <div className="relative flex-grow max-w-md">
+                            
+                            {/* Categories Filter */}
+                            <div className="flex gap-1 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto">
+                                {['Todos', 'FIIs', 'Ações', 'Multimercado', 'Renda Fixa', 'FIP'].map(filter => (
+                                    <button
+                                        key={filter}
+                                        onClick={() => setFundFilter(filter)}
+                                        className={`px-3 py-1 text-xs rounded-full whitespace-nowrap transition-colors ${
+                                            fundFilter === filter 
+                                            ? 'bg-cyan-600 text-white font-bold' 
+                                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                        }`}
+                                    >
+                                        {filter}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="relative flex-grow max-w-md w-full">
                                 <MagnifyingGlassIcon className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
                                 <input type="text" placeholder={t('ewx.funds.search')} className="w-full bg-gray-700 border border-gray-600 rounded-lg pl-10 pr-4 py-2 text-sm text-white" />
                             </div>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 overflow-y-auto pb-4 pr-1">
-                            {FUNDS_CVM_DATA.map(fund => (
+                            {filteredFunds.map(fund => (
                                 <div key={fund.ticker} className="bg-gray-800 border border-gray-700 rounded-lg p-4 hover:border-cyan-500 transition-all flex flex-col relative group">
                                     <div className="absolute top-4 right-4 text-gray-600 group-hover:text-cyan-500"><TrendingUpIcon className="w-5 h-5"/></div>
+                                    
+                                    {/* CVM Data Badge */}
+                                    <div className="absolute top-4 right-12 text-[10px] bg-gray-700 text-gray-400 px-1.5 py-0.5 rounded border border-gray-600 font-mono">
+                                        CVM DATA
+                                    </div>
+
                                     <div className="mb-3">
                                         <div className="flex items-center gap-2 mb-1">
                                             <h3 className="font-bold text-white text-xl">{fund.ticker}</h3>
-                                            <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wide ${fund.strategy === 'Logística' ? 'bg-blue-900 text-blue-300' : fund.strategy === 'Híbrido' ? 'bg-purple-900 text-purple-300' : 'bg-gray-700 text-gray-300'}`}>{fund.strategy}</span>
+                                            <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wide ${
+                                                fund.type === 'FII' ? 'bg-blue-900/50 text-blue-300' :
+                                                fund.type === 'FIM' ? 'bg-yellow-900/50 text-yellow-300' :
+                                                fund.type === 'FIA' ? 'bg-green-900/50 text-green-300' :
+                                                'bg-gray-700 text-gray-300'
+                                            }`}>
+                                                {fund.type}
+                                            </span>
                                         </div>
-                                        <p className="text-xs text-gray-400 h-8 line-clamp-2">{fund.name}</p>
+                                        <p className="text-xs text-gray-400 h-4 truncate" title={fund.name}>{fund.name}</p>
+                                        <div className="flex gap-2 text-[10px] text-gray-500 mt-1">
+                                            <span>CNPJ: {fund.cnpj}</span>
+                                            <span>|</span>
+                                            <span>Adm: {fund.admin}</span>
+                                        </div>
                                     </div>
                                     
+                                    {/* Assets List */}
+                                    {fund.assets.length > 0 && (
+                                        <div className="mb-3 flex flex-wrap gap-2">
+                                            {fund.assets.map(asset => (
+                                                <button 
+                                                    key={asset.id} 
+                                                    onClick={() => setSelectedAssetDetail(asset)}
+                                                    className="text-[10px] bg-gray-700 hover:bg-gray-600 text-gray-300 px-2 py-1 rounded flex items-center gap-1 transition-colors"
+                                                >
+                                                    <MapPinIcon className="w-3 h-3" /> {asset.name}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+
                                     <div className="grid grid-cols-3 gap-2 text-xs mb-4 bg-gray-900/50 p-2 rounded-md">
                                         <div className="text-center border-r border-gray-700">
                                             <p className="text-gray-500">{t('ewx.funds.price')}</p>
-                                            <p className="font-mono text-white font-bold">R${fund.price?.toFixed(2)}</p>
+                                            <p className="font-mono text-white font-bold">R${fund.price?.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
                                         </div>
                                         <div className="text-center border-r border-gray-700">
                                             <p className="text-gray-500">{t('ewx.funds.dy')}</p>
-                                            <p className="font-mono text-green-400 font-bold">{fund.dy_12m}%</p>
+                                            <p className="font-mono text-green-400 font-bold">{fund.dy_12m > 0 ? `${fund.dy_12m}%` : '-'}</p>
                                         </div>
                                         <div className="text-center">
                                             <p className="text-gray-500">{t('ewx.funds.pvp')}</p>
                                             <p className="font-mono text-white font-bold">{fund.p_vp}</p>
                                         </div>
+                                    </div>
+                                    <div className="text-[10px] text-gray-500 flex justify-between px-1 mb-1">
+                                        <span>Taxa Adm: {fund.adminFee || 'N/A'}</span>
+                                        <span>Liq. Diária: {(fund.liquidityDaily || 0 / 1000000).toFixed(1)}M</span>
                                     </div>
                                     <FundCardActions fund={fund} />
                                 </div>
@@ -1047,6 +1544,13 @@ export default function MainDashboard() {
             fund={selectedFundForRetrofit.fund}
             onClose={() => setSelectedFundForRetrofit(null)}
             t={t}
+          />
+      )}
+
+      {selectedAssetDetail && (
+          <AssetDetailModal 
+            asset={selectedAssetDetail}
+            onClose={() => setSelectedAssetDetail(null)}
           />
       )}
     </div>

@@ -1,3 +1,4 @@
+
 import { Plant } from '../types';
 
 export const POWER_PLANTS: Plant[] = [
@@ -24,15 +25,15 @@ export const POWER_PLANTS: Plant[] = [
     descriptionKey: 'plants.parqueTermicoPedreira.description',
   },
   {
-    name: 'GPA CD 01 BESS Solar',
-    nameKey: 'GPA CD 01 BESS Solar',
+    name: 'BZL11 CD01 BESS Solar',
+    nameKey: 'BZL11 CD01 BESS Solar',
     type: 'new',
     power: 8.0,
     fuelKey: 'fuel.SOLAR_BESS',
     identifier: { type: 'location', valueKey: 'Osasco, SP' },
     statusKey: 'plant.status.proposal',
-    coordinates: { lat: -23.4697, lng: -46.8066 },
-    descriptionKey: 'Retrofit do CD 01 (GPA) com 7.5 MWp Solar e 2 MWh BESS para eficiência energética e backup limpo.',
+    coordinates: { lat: -23.485696809853454, lng: -46.76985535879555 },
+    descriptionKey: 'Retrofit do CD 01 (GPA) com 7.5 MWp Solar e 2 MWh BESS. Modelo Triple Net (FII).',
     efficiency: 21,
     generation2023: null,
     emissions2023: 0,

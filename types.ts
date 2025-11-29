@@ -154,6 +154,12 @@ export interface RealEstateAsset {
   description?: string;
   amenities?: string[];
   transport?: string[];
+  // Technical Specifications
+  ceilingHeight?: number; // m
+  floorCapacity?: number; // ton/m2
+  dockCount?: number;
+  parkingSpots?: { trucks: number; cars: number };
+  security?: string;
   // Energy Retrofit Fields
   energyInfrastructure?: {
     generators: string[]; // e.g., "4x 500kVA"
@@ -169,7 +175,7 @@ export interface InvestmentFund {
   admin: string;
   manager: string;
   type: 'FII' | 'FIP' | 'FIA' | 'FIM'; // CVM Type
-  strategy: 'Logística' | 'Family Office' | 'Institucional' | 'Multiestratégia' | 'Papel' | 'Infraestrutura' | 'Shopping' | 'Híbrido' | 'Desenvolvimento';
+  strategy: 'Logística' | 'Family Office' | 'Institucional' | 'Multiestratégia' | 'Papel' | 'Infraestrutura' | 'Shopping' | 'Híbrido' | 'Desenvolvimento' | 'Macro' | 'Ações Livre' | 'Crédito Privado';
   audience: 'Geral' | 'Qualificado' | 'Profissional'; // CVM classification
   netWorth: number; // Patrimônio Líquido
   price?: number; // Market Price (if listed)
