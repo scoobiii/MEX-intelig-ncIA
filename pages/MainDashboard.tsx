@@ -69,7 +69,7 @@ const mockOrderBook: OrderBookItem[] = Array.from({ length: 10 }).map((_, i) => 
     price: 250 + (i * 2) * (Math.random() > 0.5 ? 1 : -1),
     amount: Math.floor(Math.random() * 500),
     total: 0,
-    type: Math.random() > 0.5 ? 'ask' : 'bid'
+    type: (Math.random() > 0.5 ? 'ask' : 'bid') as 'ask' | 'bid'
 })).sort((a, b) => b.price - a.price);
 
 const fundPortfolio: FundAsset[] = [
