@@ -1,3 +1,4 @@
+
 export enum PlantStatus {
   Online = 'ONLINE',
   Offline = 'OFFLINE',
@@ -96,7 +97,7 @@ export interface Plant {
 export interface MarketParticipant {
   id: string;
   name: string;
-  type: 'Gerador' | 'Distribuidor' | 'Consumidor';
+  type: 'Gerador' | 'Distribuidor' | 'Consumidor' | 'Fundo de Investimento';
   capacity?: number; // MW for generators
   demand?: number; // MW for consumers
   price: number; // R$/MWh
@@ -110,4 +111,31 @@ export interface EnergyTransaction {
   token: string;
   txHash: string;
   timestamp: string;
+}
+
+// Financial / Trading Types
+export interface OHLCV {
+  time: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+  ema7?: number;
+  ema25?: number;
+}
+
+export interface OrderBookItem {
+  price: number;
+  amount: number;
+  total: number;
+  type: 'bid' | 'ask';
+}
+
+export interface FundAsset {
+  symbol: string;
+  name: string;
+  allocation: number; // Percentage
+  value: number; // Current value
+  change24h: number;
 }

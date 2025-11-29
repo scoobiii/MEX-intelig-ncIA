@@ -1,5 +1,4 @@
 
-
 import React, { useState } from 'react';
 import { Bars3Icon, XMarkIcon } from './icons';
 
@@ -31,7 +30,7 @@ const navItems: NavItem[] = [
     { label: 'Análise de Rede', page: 'Grid Analysis' },
     { label: 'Potencial Solar', page: 'Solar Potential' },
     { label: 'Open Energy', page: 'Open Energy' },
-    { label: 'MEX Trade', page: 'EnerTradeZK' },
+    { label: 'Terminal Apex', page: 'EnerTradeZK' },
     { label: 'Status', page: 'Project Status' },
 ];
 
