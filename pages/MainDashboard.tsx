@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import DashboardCard from '../DashboardCard';
 import {
@@ -14,12 +15,15 @@ import {
   TrendingUpIcon,
   ChartBarIcon,
   CloseIcon,
-  SignalIcon
+  SignalIcon,
+  ArrowsRightLeftIcon
 } from '../application/components/icons';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, BarChart, Bar, CartesianGrid } from 'recharts';
 import { useTranslations } from '../hooks/useTranslations';
 import { useSettings } from '../hooks/useSettings';
 import { InvestmentFund, RealEstateAsset } from '../types';
+import AssetRetrofitSimulator from '../application/components/AssetRetrofitSimulator'; // Import simulator
+import IoTPlantMonitor from '../application/components/IoTPlantMonitor'; // Import Monitor
 
 // Mock Data for Funds
 const MOCK_FUNDS: InvestmentFund[] = [
@@ -57,6 +61,7 @@ const MOCK_FUNDS: InvestmentFund[] = [
                     bessCapacityMWh: 4,
                     annualGenerationGWh: 18,
                     co2AvoidedTons: 1500,
+                    investmentCapex: 60000000,
                     equipment: ['Painéis 550W', 'Inversores Huawei', 'BESS BYD'],
                     contractType: 'Bot (Build-Operate-Transfer)',
                     technology: {
@@ -91,7 +96,12 @@ const MOCK_FUNDS: InvestmentFund[] = [
     }
 ];
 
-// ==================== FUND DETAIL MODAL ====================
+// ... (Existing FundDetailModal and other subcomponents code) ...
+// To save space, I'm assuming FundDetailModal is defined above or imported.
+// For the purpose of this output, I will redefine it briefly if needed, but ideally it wraps the existing one.
+// Since I need to output the FULL file, I will include the full previous logic + the update.
+
+// ==================== FUND DETAIL MODAL WITH INTEGRATION STATUS ====================
 
 const FundDetailModal: React.FC<{ 
     fund: InvestmentFund; 
@@ -293,14 +303,154 @@ const FundDetailModal: React.FC<{
     );
 };
 
+// ==================== ASSET DETAIL MODAL ====================
+
+const AssetDetailModal: React.FC<{ asset: RealEstateAsset; onClose: () => void }> = ({ asset, onClose }) => (
+    <div className="fixed inset-0 bg-gray-900/90 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
+        <div className="bg-gray-800 w-full max-w-4xl rounded-xl border border-gray-700 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+            <div className="p-6 border-b border-gray-700 flex justify-between items-start">
+                <div>
+                    <h2 className="text-2xl font-bold text-white">{asset.name}</h2>
+                    <p className="text-gray-400">{asset.address} - {asset.city}/{asset.state}</p>
+                </div>
+                <button onClick={onClose} className="p-2 hover:bg-gray-700 rounded-full text-gray-400 hover:text-white transition">
+                    <CloseIcon className="w-6 h-6" />
+                </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto">
+                {/* Main Info */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div className="bg-gray-700/30 p-3 rounded-lg">
+                        <p className="text-gray-400 text-xs">Área Locável (GLA)</p>
+                        <p className="text-xl font-bold text-white">{asset.gla.toLocaleString()} m²</p>
+                    </div>
+                    <div className="bg-gray-700/30 p-3 rounded-lg">
+                        <p className="text-gray-400 text-xs">Vacância Física</p>
+                        <p className="text-xl font-bold text-green-400">{asset.vacancy}%</p>
+                    </div>
+                    <div className="bg-gray-700/30 p-3 rounded-lg">
+                        <p className="text-gray-400 text-xs">Inquilinos</p>
+                        <p className="text-sm font-semibold text-white truncate">{asset.tenants.join(', ')}</p>
+                    </div>
+                    <div className="bg-gray-700/30 p-3 rounded-lg">
+                        <p className="text-gray-400 text-xs">Tipo</p>
+                        <p className="text-lg font-bold text-cyan-400">{asset.type}</p>
+                    </div>
+                </div>
+
+                {/* Retrofit Details Section */}
+                {asset.retrofitDetails && (
+                    <div className="mb-6 border border-green-500/30 bg-green-900/10 rounded-xl p-5 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-2 opacity-10">
+                            <BoltIcon className="w-32 h-32 text-green-400" />
+                        </div>
+                        <h3 className="text-lg font-bold text-green-400 mb-4 flex items-center gap-2 relative z-10">
+                            <BoltIcon className="w-5 h-5" />
+                            Usina de Energia Integrada (Retrofit BESS + Solar)
+                        </h3>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+                            <div>
+                                <h4 className="text-sm font-bold text-white mb-2 border-b border-green-500/30 pb-1">Geração Solar</h4>
+                                <ul className="space-y-1 text-sm text-gray-300">
+                                    <li><span className="text-gray-500">Capacidade:</span> <span className="font-bold text-white">{asset.retrofitDetails.solarCapacityMWp} MWp</span></li>
+                                    <li><span className="text-gray-500">Geração Anual:</span> {asset.retrofitDetails.annualGenerationGWh} GWh</li>
+                                    <li><span className="text-gray-500">Tecnologia:</span> {asset.retrofitDetails.technology.panels}</li>
+                                    <li><span className="text-gray-500">Inversores:</span> {asset.retrofitDetails.technology.inverters}</li>
+                                </ul>
+                            </div>
+                            
+                            <div>
+                                <h4 className="text-sm font-bold text-white mb-2 border-b border-green-500/30 pb-1">Armazenamento (BESS)</h4>
+                                <ul className="space-y-1 text-sm text-gray-300">
+                                    <li><span className="text-gray-500">Capacidade:</span> <span className="font-bold text-white">{asset.retrofitDetails.bessCapacityMWh} MWh</span></li>
+                                    <li><span className="text-gray-500">Química:</span> {asset.retrofitDetails.technology.batteries}</li>
+                                    <li><span className="text-gray-500">Uso:</span> Peak Shaving</li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <h4 className="text-sm font-bold text-white mb-2 border-b border-green-500/30 pb-1">Performance ESG</h4>
+                                <ul className="space-y-1 text-sm text-gray-300">
+                                    <li><span className="text-gray-500">CO2 Evitado:</span> <span className="font-bold text-green-400">{asset.retrofitDetails.co2AvoidedTons} t/ano</span></li>
+                                    <li><span className="text-gray-500">Contrato:</span> {asset.retrofitDetails.contractType}</li>
+                                    <li><span className="text-gray-500">Status:</span> <span className="px-2 py-0.5 bg-green-500/20 text-green-400 rounded-full text-xs">Operacional</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Technical Specs & Amenities */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 className="text-lg font-bold text-white mb-3">Especificações Técnicas</h3>
+                        <div className="bg-gray-900 rounded-lg p-4 space-y-2 text-sm text-gray-300">
+                            {asset.ceilingHeight && <div className="flex justify-between border-b border-gray-800 pb-1"><span>Pé-direito livre:</span> <span className="text-white">{asset.ceilingHeight} m</span></div>}
+                            {asset.floorCapacity && <div className="flex justify-between border-b border-gray-800 pb-1"><span>Capacidade do piso:</span> <span className="text-white">{asset.floorCapacity} ton/m²</span></div>}
+                            {asset.dockCount && <div className="flex justify-between border-b border-gray-800 pb-1"><span>Docas:</span> <span className="text-white">{asset.dockCount}</span></div>}
+                            {asset.security && <div className="flex justify-between border-b border-gray-800 pb-1"><span>Segurança:</span> <span className="text-white">{asset.security}</span></div>}
+                            {asset.energyInfrastructure && (
+                                <div className="pt-2">
+                                    <span className="text-gray-500 block mb-1">Infraestrutura de Energia (Legado):</span>
+                                    <span className="text-white block bg-gray-800 p-2 rounded border border-gray-700">
+                                        {asset.energyInfrastructure.generators.join(', ')} ({asset.energyInfrastructure.totalBackupCapacity} kVA)
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 className="text-lg font-bold text-white mb-3">Amenidades e Transporte</h3>
+                        <div className="bg-gray-900 rounded-lg p-4 space-y-4">
+                            {asset.amenities && (
+                                <div>
+                                    <p className="text-xs text-gray-500 mb-1">Serviços no Condomínio</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {asset.amenities.map(a => <span key={a} className="px-2 py-1 bg-gray-800 border border-gray-700 rounded text-xs text-gray-300">{a}</span>)}
+                                    </div>
+                                </div>
+                            )}
+                            {asset.transport && (
+                                <div>
+                                    <p className="text-xs text-gray-500 mb-1">Acesso e Logística</p>
+                                    <ul className="space-y-1">
+                                        {asset.transport.map(t => (
+                                            <li key={t} className="flex items-center gap-2 text-sm text-gray-300">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-cyan-500"></span> {t}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+);
+
 // ==================== MAIN DASHBOARD COMPONENT ====================
 
 const MainDashboard: React.FC = () => {
     const { language } = useSettings();
     const { t } = useTranslations(language);
     const [selectedFund, setSelectedFund] = useState<InvestmentFund | null>(null);
+    const [selectedAssetDetail, setSelectedAssetDetail] = useState<RealEstateAsset | null>(null);
+    const [selectedFundForRetrofit, setSelectedFundForRetrofit] = useState<{fund: InvestmentFund, asset: RealEstateAsset} | null>(null);
+    const [selectedFundDetail, setSelectedFundDetail] = useState<InvestmentFund | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     
+    // Filters
+    const [strategyFilter, setStrategyFilter] = useState('Todas');
+    const [audienceFilter, setAudienceFilter] = useState('Todos');
+
+    const strategies = ['Todas', 'Logística', 'Híbrido', 'Papel', 'Shopping', 'Desenvolvimento'];
+    const audiences = ['Todos', 'Geral', 'Qualificado', 'Profissional'];
+
     // Trading data
     const [mockOrderBook] = useState([
         { price: 105.60, amount: 50, total: 5280, type: 'ask' },
@@ -313,6 +463,13 @@ const MainDashboard: React.FC = () => {
     const handleFundClick = (fund: InvestmentFund) => {
         setSelectedFund(fund);
     };
+
+    const filteredFunds = MOCK_FUNDS.filter(f => {
+        const matchesSearch = f.ticker.toLowerCase().includes(searchQuery.toLowerCase()) || f.name.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesStrategy = strategyFilter === 'Todas' || f.strategy === strategyFilter;
+        const matchesAudience = audienceFilter === 'Todos' || f.audience === audienceFilter;
+        return matchesSearch && matchesStrategy && matchesAudience;
+    });
 
     return (
         <div className="mt-6 space-y-6">
@@ -356,15 +513,31 @@ const MainDashboard: React.FC = () => {
                         title={t('ewx.funds.title')} 
                         icon={<MagnifyingGlassIcon className="w-6 h-6" />}
                         action={
-                            <div className="relative w-64">
-                                <input 
-                                    type="text" 
-                                    placeholder={t('ewx.funds.search')}
-                                    className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1 text-sm text-white focus:outline-none focus:border-cyan-500"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
-                                <MagnifyingGlassIcon className="w-4 h-4 text-gray-400 absolute right-2 top-1.5" />
+                            <div className="flex gap-2">
+                                <select 
+                                    className="bg-gray-700 border border-gray-600 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-cyan-500"
+                                    value={strategyFilter}
+                                    onChange={(e) => setStrategyFilter(e.target.value)}
+                                >
+                                    {strategies.map(s => <option key={s} value={s}>{s}</option>)}
+                                </select>
+                                <select 
+                                    className="bg-gray-700 border border-gray-600 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-cyan-500"
+                                    value={audienceFilter}
+                                    onChange={(e) => setAudienceFilter(e.target.value)}
+                                >
+                                    {audiences.map(a => <option key={a} value={a}>{a}</option>)}
+                                </select>
+                                <div className="relative w-48">
+                                    <input 
+                                        type="text" 
+                                        placeholder={t('ewx.funds.search')}
+                                        className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-1 text-xs text-white focus:outline-none focus:border-cyan-500"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                    />
+                                    <MagnifyingGlassIcon className="w-3 h-3 text-gray-400 absolute right-2 top-1.5" />
+                                </div>
                             </div>
                         }
                     >
@@ -381,10 +554,12 @@ const MainDashboard: React.FC = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-700">
-                                    {MOCK_FUNDS
-                                        .filter(f => f.ticker.toLowerCase().includes(searchQuery.toLowerCase()) || f.name.toLowerCase().includes(searchQuery.toLowerCase()))
-                                        .map((fund) => (
-                                        <tr key={fund.ticker} className="hover:bg-gray-700/30 transition-colors">
+                                    {filteredFunds.map((fund) => (
+                                        <tr 
+                                            key={fund.ticker} 
+                                            className="hover:bg-gray-700/30 transition-colors cursor-pointer"
+                                            onClick={() => setSelectedFundDetail(fund)}
+                                        >
                                             <td className="px-4 py-3 font-medium text-white">{fund.ticker}</td>
                                             <td className="px-4 py-3">{fund.name}</td>
                                             <td className="px-4 py-3 font-mono text-cyan-400">R$ {fund.price?.toFixed(2)}</td>
@@ -392,7 +567,6 @@ const MainDashboard: React.FC = () => {
                                             <td className="px-4 py-3">{fund.p_vp}</td>
                                             <td className="px-4 py-3 text-right">
                                                 <button 
-                                                    onClick={() => handleFundClick(fund)}
                                                     className="px-3 py-1 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs font-bold transition-colors"
                                                 >
                                                     Detalhes
@@ -453,13 +627,44 @@ const MainDashboard: React.FC = () => {
                 </div>
             </div>
 
+            {/* IoT Monitor Widget (Added to main dashboard flow for visibility) */}
+            <div className="col-span-12">
+               <IoTPlantMonitor />
+            </div>
+
             {/* Fund Detail Modal */}
-            {selectedFund && (
+            {selectedFundDetail && (
                 <FundDetailModal 
-                    fund={selectedFund} 
-                    onClose={() => setSelectedFund(null)} 
-                    onAssetClick={(asset) => console.log('Asset clicked:', asset)}
-                    onRetrofitClick={() => console.log('Retrofit clicked')}
+                    fund={selectedFundDetail} 
+                    onClose={() => setSelectedFundDetail(null)} 
+                    onAssetClick={(asset) => {
+                        setSelectedFundDetail(null); 
+                        setSelectedAssetDetail(asset);
+                    }}
+                    onRetrofitClick={() => {
+                        if(selectedFundDetail.assets.length > 0) {
+                            setSelectedFundDetail(null);
+                            setSelectedFundForRetrofit({ fund: selectedFundDetail, asset: selectedFundDetail.assets[0] });
+                        }
+                    }}
+                    t={t}
+                />
+            )}
+
+            {/* Asset Detail Modal */}
+            {selectedAssetDetail && (
+                <AssetDetailModal 
+                    asset={selectedAssetDetail} 
+                    onClose={() => setSelectedAssetDetail(null)} 
+                />
+            )}
+
+            {/* Retrofit Simulator */}
+            {selectedFundForRetrofit && (
+                <AssetRetrofitSimulator 
+                    fund={selectedFundForRetrofit.fund}
+                    asset={selectedFundForRetrofit.asset}
+                    onClose={() => setSelectedFundForRetrofit(null)}
                     t={t}
                 />
             )}
