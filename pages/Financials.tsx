@@ -52,25 +52,27 @@ const Financials: React.FC<FinancialsProps> = ({
 
     const financialMetrics = useMemo(() => {
         const isOnline = plantStatus === PlantStatus.Online;
-        const isRealEstateMode = fuelMode === FuelMode.SolarBess; // BZL11 Mode
+        const isRealEstateMode = fuelMode === FuelMode.SolarBess; // BZL11 FII Mode
 
         // --- IFRS LOGIC SELECTION ---
         if (isRealEstateMode) {
             // === FII / REAL ESTATE MODEL (Triple Net) ===
-            // Context: BZL11 Fund owning CD01
+            // Context: BZL11 Fund owning CD01 BESS Solar
+            // Tenant (GPA) pays for utilities and fuel (grid energy).
+            // Fund receives RENT for the real estate AND the solar infrastructure.
             
             const GLA_TOTAL = 127435; // m²
             const AVG_RENT_PER_M2 = 32.50; // R$/m² (Triple A region)
-            const ENERGY_INFRA_RENT = 350000; // R$/month (Lease of Solar/BESS equipment)
+            const ENERGY_INFRA_RENT = 350000; // R$/month (Lease of Solar/BESS equipment to GPA)
             const ADMIN_FEE_RATE = 0.002; // 0.2% a.a. on Net Worth
             const NET_WORTH = 850000000; // R$ 850M
 
-            // 1. Revenues
-            const logisticsRevenue = GLA_TOTAL * AVG_RENT_PER_M2; // ~R$ 4.14M
+            // 1. Revenues (Positive Inflows)
+            const logisticsRevenue = GLA_TOTAL * AVG_RENT_PER_M2; // ~R$ 4.14M/month
             const energyInfraRevenue = isOnline ? ENERGY_INFRA_RENT : 0;
-            const dataCenterLeaseRevenue = 150000; // Lease to Odata
+            const dataCenterLeaseRevenue = 150000; // Lease to Odata (Colocation/Space)
             
-            // Carbon Credits (Fund receives part of it)
+            // Carbon Credits (Fund receives share of environmental benefit)
             const BRL_USD_RATE = 5.0;
             const estimatedGenerationMWh = 1800;
             const co2AvoidedTons = estimatedGenerationMWh * 0.1;
@@ -79,27 +81,36 @@ const Financials: React.FC<FinancialsProps> = ({
             const totalRevenue = logisticsRevenue + energyInfraRevenue + carbonRevenue + dataCenterLeaseRevenue;
 
             // 2. Costs (Triple Net - Tenant pays OPEX)
-            const cogsFuel = 0; // No fuel cost for Fund
+            // CRITICAL: Ensure NO fuel cost is deducted here for FII mode.
+            const cogsFuel = 0; 
+            
+            // Fund Specific Expenses
             const adminFee = (NET_WORTH * ADMIN_FEE_RATE) / 12; // ~R$ 141k/mo
-            const structuralMaintenance = 25000; // Roof/Structure only
+            const structuralMaintenance = 25000; // Roof/Structure only (Landlord responsibility)
             const insurance = 15000;
             const legalConsulting = 10000;
 
             const totalExpenses = adminFee + structuralMaintenance + insurance + legalConsulting;
 
             // 3. Results
-            const grossProfit = totalRevenue;
-            const ebitda = grossProfit - totalExpenses; // NOI
-            const depreciation = 60000000 / (25 * 12); // Solar CAPEX deprec.
+            const grossProfit = totalRevenue; // Gross Revenue from Rental
+            const ebitda = grossProfit - totalExpenses; // NOI (Net Operating Income)
+            
+            // Accounting Depreciation (Non-cash)
+            const solarCapex = 60000000; // R$ 60M Retrofit
+            const depreciation = solarCapex / (25 * 12); // 25 years useful life
+            
             const ebit = ebitda - depreciation;
-            const taxes = 0; // FII exempt
+            const taxes = 0; // FII is exempt from corporate income tax on distributed profits
             const netProfit = ebit;
-            const ffo = netProfit + depreciation; // Distributable
+            
+            // FFO (Funds From Operations) = Net Profit + Depreciation
+            const ffo = netProfit + depreciation; 
 
             const revenueStreamData = [
                 { name: 'Aluguel Logístico (GLA)', value: logisticsRevenue, color: '#3b82f6' },
-                { name: 'Aluguel Usina (Solar)', value: energyInfraRevenue, color: '#f59e0b' },
-                { name: 'Lease Data Center', value: dataCenterLeaseRevenue, color: '#8b5cf6' },
+                { name: 'Receita Energia (BZL11 Solar)', value: energyInfraRevenue, color: '#f59e0b' },
+                { name: 'Lease Data Center (Odata)', value: dataCenterLeaseRevenue, color: '#8b5cf6' },
                 { name: 'Créditos Carbono', value: carbonRevenue, color: '#10b981' },
             ];
             
@@ -117,6 +128,7 @@ const Financials: React.FC<FinancialsProps> = ({
 
         } else {
             // === INDUSTRIAL / THERMAL MODEL ===
+            // Conventional generation where Fuel is a major cost
             const REVENUE_PER_RACK_PER_MONTH = 285000;
             const OPEX_PER_RACK_PER_MONTH = 2500;
             const TAX_RATE = 0.25;
@@ -126,7 +138,7 @@ const Financials: React.FC<FinancialsProps> = ({
             const monthlyMWh = powerOutput * 24 * 30;
             const energyRevenue = isOnline ? monthlyMWh * ENERGY_PRICE_BRL_PER_MWH : 0;
             const cloudRevenue = isOnline ? activeRackCount * REVENUE_PER_RACK_PER_MONTH : 0;
-            const co2ReducedTons = isOnline && fuelMode !== FuelMode.NaturalGas ? (monthlyMWh * 0.2) : 0; // Simplified
+            const co2ReducedTons = isOnline && fuelMode !== FuelMode.NaturalGas ? (monthlyMWh * 0.2) : 0; 
             const carbonRevenue = co2ReducedTons * carbonPrice * BRL_USD_RATE;
 
             const totalRevenue = energyRevenue + cloudRevenue + carbonRevenue;
@@ -204,7 +216,7 @@ const Financials: React.FC<FinancialsProps> = ({
                 <div className="space-y-3 mb-4">
                     <div className="flex justify-between items-baseline p-2 bg-gray-900/50 rounded-lg border-l-4 border-blue-500">
                         <span className="text-gray-300">
-                            {financialMetrics.mode === 'FII' ? 'Receita Bruta (Aluguéis)' : 'Receita Total'}
+                            {financialMetrics.mode === 'FII' ? 'Receita Bruta (Aluguéis + Energia)' : 'Receita Total'}
                         </span>
                         <span className="text-xl font-bold text-white">{formatCurrency(financialMetrics.totalRevenue)}</span>
                     </div>
@@ -229,7 +241,7 @@ const Financials: React.FC<FinancialsProps> = ({
 
                     <div className="w-full border-t border-gray-700 my-1"></div>
                     <div className="flex justify-between items-baseline p-2">
-                        <span className="text-gray-300 font-semibold">NOI (EBITDA)</span>
+                        <span className="text-gray-300 font-semibold">NOI (Lucro Operacional Líquido)</span>
                         <span className="font-bold text-green-400">{formatCurrency(financialMetrics.ebitda)}</span>
                     </div>
                     <div className="flex justify-between items-baseline p-2 bg-green-900/20 rounded-lg border border-green-900">
@@ -266,7 +278,7 @@ const Financials: React.FC<FinancialsProps> = ({
                 </div>
             </DashboardCard>
             
-            <DashboardCard title={'Composição de Receitas'} icon={<ChartPieIcon className="w-6 h-6" />}>
+            <DashboardCard title={'Composição de Receitas (Portfólio)'} icon={<ChartPieIcon className="w-6 h-6" />}>
                  <div className="h-full flex flex-col justify-center">
                     <div className="flex-grow h-56 relative">
                         <ResponsiveContainer width="100%" height="100%">

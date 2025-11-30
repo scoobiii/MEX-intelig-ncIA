@@ -14,6 +14,7 @@ interface TreeMapNode {
   current: number; // A
   efficiency: number; // %
   irradiance: number; // W/m²
+  [key: string]: any;
 }
 
 const generateSolarPanelData = (): TreeMapNode[] => {
@@ -101,7 +102,7 @@ const CustomizedContent = (props: any) => {
                 width={width}
                 height={height}
                 style={{
-                    fill: colorMapping[status],
+                    fill: colorMapping[status as PanelStatus],
                     stroke: '#1f2937',
                     strokeWidth: 2,
                 }}

@@ -140,6 +140,23 @@ export interface FundAsset {
   change24h: number;
 }
 
+// Retrofit Specifics
+export interface RetrofitDetails {
+  solarCapacityMWp: number;
+  bessCapacityMWh: number;
+  annualGenerationGWh: number;
+  co2AvoidedTons: number;
+  investmentCapex?: number;
+  equipment: string[];
+  contractType: string;
+  technology: {
+    panels: string;
+    inverters: string;
+    batteries: string;
+    structure: string;
+  };
+}
+
 // CVM / Real Estate Types
 export interface RealEstateAsset {
   id: string;
@@ -165,6 +182,7 @@ export interface RealEstateAsset {
     generators: string[]; // e.g., "4x 500kVA"
     totalBackupCapacity: number; // kVA
   };
+  retrofitDetails?: RetrofitDetails; // New detailed field
   roofArea?: number; // m² available for solar
 }
 

@@ -37,6 +37,7 @@ interface TreeMapNode {
   utilization: number; // Percentage
   energyConsumption: number; // kWh
   children?: TreeMapNode[];
+  [key: string]: any;
 }
 
 interface DataCenterTreeMapProps {
