@@ -22,8 +22,8 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, BarChart, 
 import { useTranslations } from '../hooks/useTranslations';
 import { useSettings } from '../hooks/useSettings';
 import { InvestmentFund, RealEstateAsset } from '../types';
-import AssetRetrofitSimulator from '../application/components/AssetRetrofitSimulator'; // Import simulator
-import IoTPlantMonitor from '../application/components/IoTPlantMonitor'; // Import Monitor
+import AssetRetrofitSimulator from '../application/components/AssetRetrofitSimulator';
+import IoTPlantMonitor from '../application/components/IoTPlantMonitor';
 
 // Mock Data for Funds
 const MOCK_FUNDS: InvestmentFund[] = [
@@ -95,11 +95,6 @@ const MOCK_FUNDS: InvestmentFund[] = [
         adminFee: '0.90% a.a.'
     }
 ];
-
-// ... (Existing FundDetailModal and other subcomponents code) ...
-// To save space, I'm assuming FundDetailModal is defined above or imported.
-// For the purpose of this output, I will redefine it briefly if needed, but ideally it wraps the existing one.
-// Since I need to output the FULL file, I will include the full previous logic + the update.
 
 // ==================== FUND DETAIL MODAL WITH INTEGRATION STATUS ====================
 
